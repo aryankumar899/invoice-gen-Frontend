@@ -24,7 +24,7 @@ export default function Clients() {
 
   const fetchClients = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/clients', {
+      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/clients', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
@@ -62,7 +62,7 @@ export default function Clients() {
     }
     
     try {
-      const url = editingId ? `http://localhost:5000/api/clients/${editingId}` : 'http://localhost:5000/api/clients';
+      const url = editingId ? `https://invoice-generator-vfec.onrender.com/api/clients/${editingId}` : 'https://invoice-generator-vfec.onrender.com/api/clients';
       const method = editingId ? 'PUT' : 'POST';
       
       const res = await fetch(url, {
@@ -91,7 +91,7 @@ export default function Clients() {
   const executeDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/clients/${deleteId}`, {
+      const res = await fetch(`https://invoice-generator-vfec.onrender.com/api/clients/${deleteId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });

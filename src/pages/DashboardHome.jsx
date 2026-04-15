@@ -20,7 +20,7 @@ export default function DashboardHome() {
 
   const fetchInvoices = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/invoices', {
+      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/invoices', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();

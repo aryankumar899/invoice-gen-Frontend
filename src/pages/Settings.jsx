@@ -52,7 +52,7 @@ export default function Settings() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', {
+      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

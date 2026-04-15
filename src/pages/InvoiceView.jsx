@@ -501,7 +501,7 @@ export default function InvoiceView() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/invoices/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+        const res = await fetch(`https://invoice-generator-vfec.onrender.com/api/invoices/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
         if (res.ok) setInvoice(await res.json());
         else setSnackbar({ open: true, message: 'Invoice not found', severity: 'error' });
       } catch { setSnackbar({ open: true, message: 'Network error', severity: 'error' }); }

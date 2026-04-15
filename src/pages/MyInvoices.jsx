@@ -27,7 +27,7 @@ export default function MyInvoices() {
 
   const fetchInvoices = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/invoices', {
+      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/invoices', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
@@ -40,7 +40,7 @@ export default function MyInvoices() {
   const executeDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/invoices/${deleteId}`, {
+      const res = await fetch(`https://invoice-generator-vfec.onrender.com/api/invoices/${deleteId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -54,7 +54,7 @@ export default function MyInvoices() {
 
   const handleMarkPaid = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/invoices/${id}/status`, {
+      const res = await fetch(`https://invoice-generator-vfec.onrender.com/api/invoices/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -56,7 +56,7 @@ export default function CreateInvoice() {
     if (editId) {
       const fetchInvoice = async () => {
         try {
-          const res = await fetch(`http://localhost:5000/api/invoices/${editId}`, {
+          const res = await fetch(`https://invoice-generator-vfec.onrender.com/api/invoices/${editId}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
           });
           if (res.ok) {
@@ -160,11 +160,11 @@ export default function CreateInvoice() {
         status: 'Pending'
       };
 
-      let url = 'http://localhost:5000/api/invoices';
+      let url = 'https://invoice-generator-vfec.onrender.com/api/invoices';
       let method = 'POST';
       
       if (editId) {
-        url = `http://localhost:5000/api/invoices/${editId}`;
+        url = `https://invoice-generator-vfec.onrender.com/api/invoices/${editId}`;
         method = 'PUT';
       }
 
