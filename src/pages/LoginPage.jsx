@@ -27,12 +27,18 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
+    // Render free tier can take 30s to wake from sleep
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 35000);
+
     try {
       const res = await fetch('https://invoice-generator-vfec.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       
       const data = await res.json();
       
@@ -51,7 +57,12 @@ export default function LoginPage() {
         setIsLoading(false);
       }
     } catch (err) {
-      setError('Cannot connect to the server');
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') {
+        setError('Server is waking up (free tier). Please wait 30 seconds and try again.');
+      } else {
+        setError('Cannot connect to the server. Please try again.');
+      }
       setIsLoading(false);
     }
   };
