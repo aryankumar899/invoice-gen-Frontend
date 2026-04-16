@@ -97,16 +97,16 @@ export default function MyInvoices() {
 
   return (
     <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 4 }}>My Invoices</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 4, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>My Invoices</Typography>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, mb: 3 }}>
         <TextField
           placeholder="Search client or invoice ID..."
           size="small"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ width: { xs: 200, sm: 300 }, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.2)' } }}
+          sx={{ flex: 1, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.2)' } }}
         />
         
         <TextField
@@ -114,7 +114,7 @@ export default function MyInvoices() {
           size="small"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ width: 150, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.2)' }, '& .MuiSvgIcon-root': { color: '#fff' } }}
+          sx={{ width: { xs: '100%', sm: 150 }, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.2)' }, '& .MuiSvgIcon-root': { color: '#fff' } }}
         >
           <MenuItem value="All">All Statuses</MenuItem>
           <MenuItem value="Pending">Pending</MenuItem>
@@ -124,49 +124,50 @@ export default function MyInvoices() {
       </Box>
 
       <TableContainer component={Paper} sx={{ background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', borderRadius: 4, border: '1px solid rgba(255,255,255,0.05)' }}>
-        <Table>
+        <Table sx={{ minWidth: 560 }}>
           <TableHead sx={{ background: 'rgba(0,0,0,0.2)' }}>
             <TableRow>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Invoice ID</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Client Name</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Date</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Amount</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Status</TableCell>
-              <TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 600 }}>Actions</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' }, whiteSpace: 'nowrap' }}>Invoice ID</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>Client</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>Date</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>Amount</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>Status</TableCell>
+              <TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedInvoices.map((inv) => (
               <TableRow key={inv._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell sx={{ color: '#6366f1', fontWeight: 700, cursor: 'pointer', '&:hover': { color: '#818cf8', textDecoration: 'underline' } }}
+                <TableCell sx={{ color: '#6366f1', fontWeight: 700, cursor: 'pointer', px: { xs: 1, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, whiteSpace: 'nowrap', '&:hover': { color: '#818cf8', textDecoration: 'underline' } }}
                   onClick={() => navigate(`/dashboard/invoice/${inv._id}`)}
                 >{inv.invoiceId}</TableCell>
-                <TableCell sx={{ color: '#fff' }}>{inv.clientName}</TableCell>
-                <TableCell sx={{ color: '#fff' }}>{new Date(inv.date).toLocaleDateString()}</TableCell>
-                <TableCell sx={{ color: '#6366f1', fontWeight: 600 }}>{currency}{inv.totalAmount?.toFixed(2) || '0.00'}</TableCell>
-                <TableCell>
+                <TableCell sx={{ color: '#fff', px: { xs: 1, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, maxWidth: { xs: 80, md: 'none' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inv.clientName}</TableCell>
+                <TableCell sx={{ color: '#fff', px: { xs: 1, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{new Date(inv.date).toLocaleDateString()}</TableCell>
+                <TableCell sx={{ color: '#6366f1', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, whiteSpace: 'nowrap' }}>{currency}{inv.totalAmount?.toFixed(2) || '0.00'}</TableCell>
+                <TableCell sx={{ px: { xs: 1, md: 2 } }}>
                   <Chip 
                     label={inv.status} 
                     size="small"
                     sx={{ 
                       fontWeight: 600,
+                      fontSize: { xs: '0.65rem', md: '0.75rem' },
                       background: inv.status === 'Paid' ? 'rgba(16, 185, 129, 0.1)' : inv.status === 'Pending' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                       color: inv.status === 'Paid' ? '#10b981' : inv.status === 'Pending' ? '#f59e0b' : '#ef4444',
                       borderRadius: 1
                     }} 
                   />
                 </TableCell>
-                <TableCell align="right">
-                  <IconButton onClick={() => navigate(`/dashboard/create?edit=${inv._id}`)} sx={{ color: '#3b82f6', mr: 1 }} title="Edit">
-                    <EditIcon />
+                <TableCell align="right" sx={{ px: { xs: 0.5, md: 2 }, whiteSpace: 'nowrap' }}>
+                  <IconButton size="small" onClick={() => navigate(`/dashboard/create?edit=${inv._id}`)} sx={{ color: '#3b82f6' }} title="Edit">
+                    <EditIcon fontSize="small" />
                   </IconButton>
                   {inv.status !== 'Paid' && (
-                    <IconButton onClick={() => handleMarkPaid(inv._id)} sx={{ color: '#10b981', mr: 1 }} title="Mark as Paid">
-                      <CheckCircleIcon />
+                    <IconButton size="small" onClick={() => handleMarkPaid(inv._id)} sx={{ color: '#10b981' }} title="Mark as Paid">
+                      <CheckCircleIcon fontSize="small" />
                     </IconButton>
                   )}
-                  <IconButton onClick={() => confirmDelete(inv._id)} sx={{ color: '#ef4444' }} title="Delete">
-                    <DeleteIcon />
+                  <IconButton size="small" onClick={() => confirmDelete(inv._id)} sx={{ color: '#ef4444' }} title="Delete">
+                    <DeleteIcon fontSize="small" />
                   </IconButton>
                 </TableCell>
               </TableRow>

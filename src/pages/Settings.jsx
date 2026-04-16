@@ -76,16 +76,16 @@ export default function Settings() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 4 }}>Settings</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 4, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>Settings</Typography>
 
       <Paper sx={{ p: 4, background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', borderRadius: 4, border: '1px solid rgba(255,255,255,0.05)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 3 }}>
-          <Avatar src={profile.avatar} sx={{ width: 80, height: 80, background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)', fontSize: '2rem' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'center' }, mb: 4, gap: 3 }}>
+          <Avatar src={profile.avatar} sx={{ width: { xs: 64, sm: 80 }, height: { xs: 64, sm: 80 }, background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)', fontSize: '2rem', flexShrink: 0 }}>
             {!profile.avatar && (profile.name ? profile.name.charAt(0).toUpperCase() : 'U')}
           </Avatar>
-          <Box>
-            <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600 }}>Profile Picture</Typography>
-            <Button component="label" variant="outlined" sx={{ mt: 1, color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>
+          <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+            <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Profile Picture</Typography>
+            <Button component="label" variant="outlined" size="small" sx={{ mt: 1, color: '#fff', borderColor: 'rgba(255,255,255,0.2)', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
               Upload New Image
               <input type="file" hidden accept="image/*" onChange={handleImageUpload} />
             </Button>
@@ -96,10 +96,10 @@ export default function Settings() {
           <Grid item xs={12} sm={6}>
             <TextField fullWidth label="Full Name" name="name" value={profile.name} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={8} sm={4}>
             <TextField fullWidth label="Company Name" name="companyName" value={profile.companyName} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
           </Grid>
-          <Grid item xs={12} sm={2}>
+          <Grid item xs={4} sm={2}>
              <TextField select fullWidth label="Currency" name="currency" value={profile.currency} onChange={handleChange} sx={{ '& .MuiInputBase-input': { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } }, '& .MuiSvgIcon-root': { color: '#fff' } }}>
                <MenuItem value="₹">₹ (INR)</MenuItem>
                <MenuItem value="$">$ (USD)</MenuItem>
@@ -117,8 +117,8 @@ export default function Settings() {
             <TextField fullWidth multiline rows={3} label="Address" name="address" value={profile.address} onChange={handleChange} sx={{ textarea: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="contained" onClick={handleSave} sx={{ background: '#6366f1', '&:hover': { background: '#4f46e5' }, px: 4 }}>
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' } }}>
+          <Button fullWidth={false} variant="contained" onClick={handleSave} sx={{ background: '#6366f1', '&:hover': { background: '#4f46e5' }, px: 4, width: { xs: '100%', sm: 'auto' } }}>
             Save Changes
           </Button>
         </Box>

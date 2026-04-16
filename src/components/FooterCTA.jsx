@@ -33,19 +33,21 @@ export default function FooterCTA() {
           }} />
 
           <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 600, mx: 'auto' }}>
-            <Typography variant="h2" sx={{ mb: 2, color: '#fff' }}>
+            <Typography variant="h2" sx={{ mb: 2, color: '#fff', fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3.75rem' } }}>
               Start Creating Smart Invoices Today 🚀
             </Typography>
-            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400, mb: 4 }}>
+            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400, mb: 4, fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
               Join thousands of modern businesses using our AI platform to scale their revenue ops.
             </Typography>
             <Button 
               variant="contained" 
               size="large"
+              fullWidth={false}
               sx={{ 
-                px: 6, 
-                py: 2, 
-                fontSize: '1.2rem',
+                px: { xs: 4, md: 6 }, 
+                py: { xs: 1.5, md: 2 }, 
+                fontSize: { xs: '1rem', md: '1.2rem' },
+                width: { xs: '100%', sm: 'auto' },
                 borderRadius: '50px',
                 background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
                 '&:hover': {

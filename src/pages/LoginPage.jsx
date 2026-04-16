@@ -1,10 +1,80 @@
 import React, { useState } from 'react';
-import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useGoogleLogin } from '@react-oauth/google';
+import { handleGoogleAuth } from '../config/googleAuth.js';
+
+// ── Google Sign-In Button ─────────────────────────────────────────────────────
+function GoogleLoginButton({ navigate, setError, setIsLoading }) {
+  const [gLoading, setGLoading] = useState(false);
+
+  const login = useGoogleLogin({
+    flow: 'implicit',
+    onSuccess: async (tokenResponse) => {
+      setGLoading(true);
+      setError('');
+      try {
+        // Exchange access token for user info, then send to backend
+        const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+        }).then(r => r.json());
+
+        // Build a fake-credential object our backend can verify via userinfo
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://invoice-generator-vfec.onrender.com'}/api/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: tokenResponse.access_token, userInfo })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          navigate('/dashboard');
+        } else {
+          setError(data.message || 'Google sign-in failed. Please try again.');
+        }
+      } catch (err) {
+        setError('Google sign-in error. Please try again.');
+      } finally {
+        setGLoading(false);
+      }
+    },
+    onError: (err) => {
+      console.error('Google login error:', err);
+      setError('Google sign-in was cancelled or failed.');
+    }
+  });
+
+  return (
+    <Button
+      fullWidth
+      variant="outlined"
+      startIcon={gLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <GoogleIcon />}
+      onClick={() => login()}
+      disabled={gLoading}
+      sx={{
+        mb: 2,
+        py: 1.3,
+        color: '#fff',
+        borderColor: 'rgba(255,255,255,0.15)',
+        background: 'rgba(255,255,255,0.03)',
+        fontWeight: 600,
+        fontSize: '0.95rem',
+        '&:hover': {
+          borderColor: '#6366f1',
+          background: 'rgba(99,102,241,0.08)',
+        },
+        '&.Mui-disabled': { opacity: 0.6, color: '#fff' }
+      }}
+    >
+      {gLoading ? 'Signing in...' : 'Continue with Google'}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -172,32 +242,21 @@ export default function LoginPage() {
           )}
 
           {/* Social Logins */}
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-            <Button 
-              fullWidth 
-              variant="outlined" 
-              startIcon={<GoogleIcon />}
-              sx={{ 
-                color: 'text.primary', 
-                borderColor: 'rgba(255,255,255,0.1)',
-                '&:hover': { borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.02)' }
-              }}
-            >
-              Google
-            </Button>
-            <Button 
-              fullWidth 
-              variant="outlined" 
-              startIcon={<GitHubIcon />}
-              sx={{ 
-                color: 'text.primary', 
-                borderColor: 'rgba(255,255,255,0.1)',
-                '&:hover': { borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.02)' }
-              }}
-            >
-              GitHub
-            </Button>
-          </Box>
+          <GoogleLoginButton navigate={navigate} setError={setError} setIsLoading={setIsLoading} />
+          <Button 
+            fullWidth 
+            variant="outlined" 
+            startIcon={<GitHubIcon />}
+            disabled
+            sx={{ 
+              mb: 3,
+              color: 'text.secondary', 
+              borderColor: 'rgba(255,255,255,0.1)',
+              '&:hover': { borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.02)' }
+            }}
+          >
+            GitHub (Coming Soon)
+          </Button>
 
           <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>OR CONTINUE WITH</Typography>

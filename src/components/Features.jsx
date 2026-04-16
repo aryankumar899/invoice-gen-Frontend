@@ -50,14 +50,14 @@ export default function Features() {
   return (
     <Box id="features" sx={{ py: { xs: 10, md: 15 }, position: 'relative' }}>
       <Container maxWidth="xl">
-        <Box sx={{ textAlign: 'center', mb: 8, maxWidth: 700, mx: 'auto' }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 8 }, maxWidth: 700, mx: 'auto' }}>
           <Typography variant="caption" sx={{ color: '#ec4899', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Powerful Features
           </Typography>
-          <Typography variant="h2" sx={{ my: 2 }}>
+          <Typography variant="h2" sx={{ my: 2, fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3.75rem' } }}>
             Everything you need, nothing you don't.
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>
             Our platform is carefully crafted to ensure you spend less time managing invoices and more time growing your business.
           </Typography>
         </Box>
@@ -65,10 +65,11 @@ export default function Features() {
         <Box sx={{ 
           display: 'grid', 
           gridTemplateColumns: { 
-            xs: '1fr', 
-            sm: 'repeat(3, 1fr)'
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)'
           }, 
-          gap: 4 
+          gap: { xs: 2, md: 4 }
         }}>
           {features.map((feature, idx) => {
             const Icon = feature.icon;

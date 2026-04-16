@@ -109,32 +109,32 @@ export default function Clients() {
 
   return (
     <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff' }}>Clients</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen} sx={{ background: '#6366f1', '&:hover': { background: '#4f46e5' } }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>Clients</Typography>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen} sx={{ background: '#6366f1', whiteSpace: 'nowrap', '&:hover': { background: '#4f46e5' } }}>
           Add Client
         </Button>
       </Box>
 
       <TableContainer component={Paper} sx={{ background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', borderRadius: 4, border: '1px solid rgba(255,255,255,0.05)' }}>
-        <Table>
+        <Table sx={{ minWidth: { xs: '90vw', sm: '400px' } }}>
           <TableHead sx={{ background: 'rgba(0,0,0,0.2)' }}>
             <TableRow>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Name</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Email</TableCell>
-              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Phone</TableCell>
-              <TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 600 }}>Actions</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' } }}>Name</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>Email</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }}>Phone</TableCell>
+              <TableCell align="right" sx={{ color: 'text.secondary', fontWeight: 600, px: { xs: 1, md: 2 }, fontSize: { xs: '0.78rem', md: '0.875rem' } }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {clients.map((client) => (
               <TableRow key={client._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell sx={{ color: '#fff' }}>{client.name}</TableCell>
-                <TableCell sx={{ color: '#fff' }}>{client.email}</TableCell>
-                <TableCell sx={{ color: '#fff' }}>{client.phone}</TableCell>
-                <TableCell align="right">
-                  <IconButton onClick={() => handleEdit(client)} sx={{ color: '#818cf8', mr: 1 }}><EditIcon /></IconButton>
-                  <IconButton onClick={() => confirmDelete(client._id)} sx={{ color: '#ef4444' }}><DeleteIcon /></IconButton>
+                <TableCell sx={{ color: '#fff', px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>{client.name}</TableCell>
+                <TableCell sx={{ color: '#fff', px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.8rem', md: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{client.email}</TableCell>
+                <TableCell sx={{ color: '#fff', px: { xs: 1.5, md: 2 }, fontSize: { xs: '0.8rem', md: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }}>{client.phone}</TableCell>
+                <TableCell align="right" sx={{ px: { xs: 0.5, md: 2 }, whiteSpace: 'nowrap' }}>
+                  <IconButton size="small" onClick={() => handleEdit(client)} sx={{ color: '#818cf8' }}><EditIcon fontSize="small" /></IconButton>
+                  <IconButton size="small" onClick={() => confirmDelete(client._id)} sx={{ color: '#ef4444' }}><DeleteIcon fontSize="small" /></IconButton>
                 </TableCell>
               </TableRow>
             ))}

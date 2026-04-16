@@ -46,10 +46,10 @@ export default function DashboardHome() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 0.5 }}>Dashboard</Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>Welcome back, here is your financial overview.</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 0.5, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>Dashboard</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Welcome back, here is your financial overview.</Typography>
         </Box>
         <Button 
           variant="contained" 
@@ -60,6 +60,7 @@ export default function DashboardHome() {
             py: 1.5, px: 3, 
             fontWeight: 600, 
             borderRadius: 2,
+            whiteSpace: 'nowrap',
             boxShadow: '0 8px 20px rgba(99,102,241,0.3)',
             '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 25px rgba(99,102,241,0.4)' }
           }}
@@ -88,7 +89,7 @@ export default function DashboardHome() {
                 <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{stat.title}</Typography>
                 <Box sx={{ color: stat.color }}>{stat.icon}</Box>
               </Box>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 1, letterSpacing: '-1px' }}>{stat.value}</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: '#fff', mb: 1, letterSpacing: '-0.5px', fontSize: { xs: '1.3rem', md: '1.5rem' } }}>{stat.value}</Typography>
               <Typography variant="caption" sx={{ color: stat.color, fontWeight: 600, background: `${stat.color}15`, px: 1, py: 0.5, borderRadius: 1 }}>{stat.change}</Typography>
             </Paper>
           </Grid>
@@ -104,28 +105,28 @@ export default function DashboardHome() {
         border: '1px solid rgba(255,255,255,0.05)',
         overflow: 'hidden'
       }}>
-        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff' }}>Recent Invoices</Typography>
-          <Button variant="text" onClick={() => navigate('/dashboard/invoices')} sx={{ color: '#818cf8', fontWeight: 600 }}>View All</Button>
+        <Box sx={{ p: { xs: 2, md: 3 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff', fontSize: { xs: '1rem', md: '1.25rem' } }}>Recent Invoices</Typography>
+          <Button variant="text" onClick={() => navigate('/dashboard/invoices')} sx={{ color: '#818cf8', fontWeight: 600, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>View All</Button>
         </Box>
         
-        <Box sx={{ width: '100%', overflowX: 'auto' }}>
-          <Box sx={{ display: 'table', width: '100%', minWidth: 600 }}>
+        <Box sx={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <Box sx={{ display: 'table', width: '100%', minWidth: 560 }}>
             <Box sx={{ display: 'table-header-group', background: 'rgba(0,0,0,0.2)' }}>
               <Box sx={{ display: 'table-row' }}>
                 {['Invoice ID', 'Client', 'Date', 'Amount', 'Status', 'Actions'].map((head) => (
-                  <Box key={head} sx={{ display: 'table-cell', p: 2, color: 'text.secondary', fontWeight: 600, fontSize: '0.85rem' }}>{head}</Box>
+                  <Box key={head} sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, color: 'text.secondary', fontWeight: 600, fontSize: { xs: '0.75rem', md: '0.85rem' }, whiteSpace: 'nowrap' }}>{head}</Box>
                 ))}
               </Box>
             </Box>
             <Box sx={{ display: 'table-row-group' }}>
               {recentInvoices.map((inv, index) => (
                 <Box key={inv._id} sx={{ display: 'table-row', borderBottom: index !== recentInvoices.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none', '&:hover': { background: 'rgba(255,255,255,0.02)' } }}>
-                  <Box sx={{ display: 'table-cell', p: 2, color: '#6366f1', fontWeight: 700, cursor: 'pointer', '&:hover': { color: '#818cf8', textDecoration: 'underline' } }} onClick={() => navigate(`/dashboard/invoice/${inv._id}`)}>{inv.invoiceId}</Box>
-                  <Box sx={{ display: 'table-cell', p: 2, color: 'text.secondary' }}>{inv.clientName}</Box>
-                  <Box sx={{ display: 'table-cell', p: 2, color: 'text.secondary' }}>{new Date(inv.date).toLocaleDateString()}</Box>
-                  <Box sx={{ display: 'table-cell', p: 2, color: '#fff', fontWeight: 600 }}>{currency}{inv.totalAmount?.toFixed(2)}</Box>
-                  <Box sx={{ display: 'table-cell', p: 2 }}>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, color: '#6366f1', fontWeight: 700, cursor: 'pointer', fontSize: { xs: '0.8rem', md: '0.875rem' }, whiteSpace: 'nowrap', '&:hover': { color: '#818cf8', textDecoration: 'underline' } }} onClick={() => navigate(`/dashboard/invoice/${inv._id}`)}>{inv.invoiceId}</Box>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, color: 'text.secondary', fontSize: { xs: '0.8rem', md: '0.875rem' }, whiteSpace: 'nowrap', maxWidth: { xs: 80, md: 'none' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{inv.clientName}</Box>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, color: 'text.secondary', fontSize: { xs: '0.8rem', md: '0.875rem' }, whiteSpace: 'nowrap' }}>{new Date(inv.date).toLocaleDateString()}</Box>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, color: '#fff', fontWeight: 600, fontSize: { xs: '0.8rem', md: '0.875rem' }, whiteSpace: 'nowrap' }}>{currency}{inv.totalAmount?.toFixed(2)}</Box>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 } }}>
                     <Chip 
                       label={inv.status} 
                       size="small"
@@ -137,7 +138,7 @@ export default function DashboardHome() {
                       }} 
                     />
                   </Box>
-                  <Box sx={{ display: 'table-cell', p: 2 }}>
+                  <Box sx={{ display: 'table-cell', p: { xs: 1, md: 2 }, whiteSpace: 'nowrap' }}>
                     <IconButton size="small" onClick={() => navigate(`/dashboard/create?edit=${inv._id}`)} sx={{ color: '#3b82f6' }} title="Edit">
                       <EditIcon fontSize="small" />
                     </IconButton>
