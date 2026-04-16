@@ -450,6 +450,7 @@ export default function LoginPage() {
           </Button>
         </DialogActions>
       </Dialog>
+      </Box>
       </IonContent>
     </IonPage>
   );

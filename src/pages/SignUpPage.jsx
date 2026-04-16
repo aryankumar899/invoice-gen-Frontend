@@ -70,6 +70,8 @@ function GoogleSignUpButton({ navigate, setError }) {
   );
 }
 
+import { IonPage, IonContent } from '@ionic/react';
+
 export default function SignUpPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -114,198 +116,202 @@ export default function SignUpPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', p: 2 }}>
-      {/* Background Glow */}
-      <Box sx={{
-        position: 'absolute',
-        top: '20%',
-        right: '20%',
-        width: '400px',
-        height: '400px',
-        background: 'radial-gradient(circle, rgba(236,72,153,0.15) 0%, transparent 60%)',
-        filter: 'blur(60px)',
-        zIndex: 0
-      }} />
-      <Box sx={{
-        position: 'absolute',
-        bottom: '10%',
-        left: '20%',
-        width: '500px',
-        height: '500px',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 60%)',
-        filter: 'blur(60px)',
-        zIndex: 0
-      }} />
+    <IonPage>
+      <IonContent>
+        <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', p: 2 }}>
+          {/* Background Glow */}
+          <Box sx={{
+            position: 'absolute',
+            top: '20%',
+            right: '20%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(236,72,153,0.15) 0%, transparent 60%)',
+            filter: 'blur(60px)',
+            zIndex: 0
+          }} />
+          <Box sx={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '20%',
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 60%)',
+            filter: 'blur(60px)',
+            zIndex: 0
+          }} />
 
-      <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
-        <Box sx={{ position: 'absolute', top: -60, left: 0 }}>
-          <Button component={Link} to="/" startIcon={<ArrowBackIcon />} sx={{ color: 'text.secondary', '&:hover': { color: '#fff' } }}>
-            Back to Home
-          </Button>
-        </Box>
-
-        <Box sx={{ 
-          background: 'rgba(17, 24, 39, 0.7)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-          borderRadius: 4,
-          p: { xs: 4, md: 5 },
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(236, 72, 153, 0.05)',
-          textAlign: 'center'
-        }}>
-          {/* Logo */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Box sx={{ 
-              width: 48, 
-              height: 48, 
-              borderRadius: 2, 
-              background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              boxShadow: '0 4px 15px rgba(236, 72, 153, 0.4)'
-            }}>
-              <ReceiptLongIcon sx={{ color: '#fff', fontSize: 28 }} />
+          <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
+            <Box sx={{ position: 'absolute', top: -60, left: 0 }}>
+              <Button component={Link} to="/" startIcon={<ArrowBackIcon />} sx={{ color: 'text.secondary', '&:hover': { color: '#fff' } }}>
+                Back to Home
+              </Button>
             </Box>
-          </Box>
 
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#fff' }}>
-            Create an account
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4 }}>
-            Start generating beautiful AI invoices today.
-          </Typography>
+            <Box sx={{ 
+              background: 'rgba(17, 24, 39, 0.7)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: 4,
+              p: { xs: 4, md: 5 },
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(236, 72, 153, 0.05)',
+              textAlign: 'center'
+            }}>
+              {/* Logo */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                <Box sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  borderRadius: 2, 
+                  background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 15px rgba(236, 72, 153, 0.4)'
+                }}>
+                  <ReceiptLongIcon sx={{ color: '#fff', fontSize: 28 }} />
+                </Box>
+              </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-              {error}
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#fff' }}>
+                Create an account
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4 }}>
+                Start generating beautiful AI invoices today.
+              </Typography>
+
+              {error && (
+                <Alert severity="error" sx={{ mb: 3, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  {error}
+                </Alert>
+              )}
+
+              {/* Social Logins */}
+              <GoogleSignUpButton navigate={navigate} setError={setError} />
+              <Button 
+                fullWidth 
+                variant="outlined" 
+                startIcon={<GitHubIcon />}
+                disabled
+                sx={{ 
+                  mb: 3,
+                  color: 'text.secondary', 
+                  borderColor: 'rgba(255,255,255,0.1)',
+                }}
+              >
+                GitHub (Coming Soon)
+              </Button>
+
+              <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>OR CONTINUE WITH</Typography>
+              </Divider>
+
+              {/* Form */}
+              <Box component="form" onSubmit={handleSignup} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField 
+                  fullWidth 
+                  label="Full Name" 
+                  variant="outlined" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  InputProps={{
+                    sx: { 
+                      borderRadius: 2, 
+                      background: 'rgba(0,0,0,0.2)',
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
+                      color: '#fff'
+                    }
+                  }}
+                  InputLabelProps={{ sx: { color: 'text.secondary' } }}
+                />
+                <TextField 
+                  fullWidth 
+                  label="Email address" 
+                  variant="outlined" 
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  InputProps={{
+                    sx: { 
+                      borderRadius: 2, 
+                      background: 'rgba(0,0,0,0.2)',
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
+                      color: '#fff'
+                    }
+                  }}
+                  InputLabelProps={{ sx: { color: 'text.secondary' } }}
+                />
+                <TextField 
+                  fullWidth 
+                  label="Password" 
+                  type="password" 
+                  variant="outlined" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  InputProps={{
+                    sx: { 
+                      borderRadius: 2, 
+                      background: 'rgba(0,0,0,0.2)',
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
+                      color: '#fff'
+                    }
+                  }}
+                  InputLabelProps={{ sx: { color: 'text.secondary' } }}
+                />
+
+                <Button 
+                  fullWidth 
+                  type="submit"
+                  variant="contained" 
+                  size="large"
+                  disabled={isLoading}
+                  sx={{ 
+                    mt: 2,
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: 2,
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+                      boxShadow: '0 8px 16px rgba(236, 72, 153, 0.3)',
+                    },
+                    '&.Mui-disabled': {
+                      opacity: 0.7,
+                      color: '#fff'
+                    }
+                  }}
+                >
+                  {isLoading ? 'Creating Account...' : 'Sign Up'}
+                </Button>
+              </Box>
+
+              <Typography variant="body2" sx={{ mt: 4, color: 'text.secondary' }}>
+                Already have an account?{' '}
+                <MuiLink component={Link} to="/login" sx={{ color: '#fff', fontWeight: 600, textDecoration: 'none', '&:hover': { color: '#f472b6' } }}>
+                  Log in
+                </MuiLink>
+              </Typography>
+            </Box>
+          </Container>
+          
+          {/* Success Popup */}
+          <Snackbar open={showSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Alert severity="success" sx={{ width: '100%', background: '#10b981', color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
+              Account created successfully! Redirecting to login...
             </Alert>
-          )}
-
-          {/* Social Logins */}
-          <GoogleSignUpButton navigate={navigate} setError={setError} />
-          <Button 
-            fullWidth 
-            variant="outlined" 
-            startIcon={<GitHubIcon />}
-            disabled
-            sx={{ 
-              mb: 3,
-              color: 'text.secondary', 
-              borderColor: 'rgba(255,255,255,0.1)',
-            }}
-          >
-            GitHub (Coming Soon)
-          </Button>
-
-          <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>OR CONTINUE WITH</Typography>
-          </Divider>
-
-          {/* Form */}
-          <Box component="form" onSubmit={handleSignup} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField 
-              fullWidth 
-              label="Full Name" 
-              variant="outlined" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              InputProps={{
-                sx: { 
-                  borderRadius: 2, 
-                  background: 'rgba(0,0,0,0.2)',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
-                  '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                  color: '#fff'
-                }
-              }}
-              InputLabelProps={{ sx: { color: 'text.secondary' } }}
-            />
-            <TextField 
-              fullWidth 
-              label="Email address" 
-              variant="outlined" 
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              InputProps={{
-                sx: { 
-                  borderRadius: 2, 
-                  background: 'rgba(0,0,0,0.2)',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
-                  '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                  color: '#fff'
-                }
-              }}
-              InputLabelProps={{ sx: { color: 'text.secondary' } }}
-            />
-            <TextField 
-              fullWidth 
-              label="Password" 
-              type="password" 
-              variant="outlined" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              InputProps={{
-                sx: { 
-                  borderRadius: 2, 
-                  background: 'rgba(0,0,0,0.2)',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
-                  '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                  color: '#fff'
-                }
-              }}
-              InputLabelProps={{ sx: { color: 'text.secondary' } }}
-            />
-
-            <Button 
-              fullWidth 
-              type="submit"
-              variant="contained" 
-              size="large"
-              disabled={isLoading}
-              sx={{ 
-                mt: 2,
-                py: 1.5,
-                background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-                fontWeight: 600,
-                fontSize: '1rem',
-                borderRadius: 2,
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
-                  boxShadow: '0 8px 16px rgba(236, 72, 153, 0.3)',
-                },
-                '&.Mui-disabled': {
-                  opacity: 0.7,
-                  color: '#fff'
-                }
-              }}
-            >
-              {isLoading ? 'Creating Account...' : 'Sign Up'}
-            </Button>
-          </Box>
-
-          <Typography variant="body2" sx={{ mt: 4, color: 'text.secondary' }}>
-            Already have an account?{' '}
-            <MuiLink component={Link} to="/login" sx={{ color: '#fff', fontWeight: 600, textDecoration: 'none', '&:hover': { color: '#f472b6' } }}>
-              Log in
-            </MuiLink>
-          </Typography>
+          </Snackbar>
         </Box>
-      </Container>
-      
-      {/* Success Popup */}
-      <Snackbar open={showSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="success" sx={{ width: '100%', background: '#10b981', color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
-          Account created successfully! Redirecting to login...
-        </Alert>
-      </Snackbar>
-    </Box>
+      </IonContent>
+    </IonPage>
   );
 }
