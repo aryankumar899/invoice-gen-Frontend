@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -83,6 +83,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromSignup = location.state?.fromSignup;
 
   // Reset Password State
   const [resetModalOpen, setResetModalOpen] = useState(false);
@@ -238,6 +240,12 @@ export default function LoginPage() {
           {error && (
             <Alert severity="error" sx={{ mb: 3, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
               {error}
+            </Alert>
+          )}
+          
+          {fromSignup && (
+            <Alert severity="success" sx={{ mb: 3, background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              Registration successful! Please log in to your account.
             </Alert>
           )}
 

@@ -30,7 +30,7 @@ function GoogleSignUpButton({ navigate, setError }) {
         if (data.success) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          navigate('/dashboard');
+          navigate('/login');
         } else {
           setError(data.message || 'Google sign-up failed. Please try again.');
         }
@@ -101,7 +101,7 @@ export default function SignUpPage() {
         setShowSuccess(true);
         // Delay redirect to allow user to read popup
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/login', { state: { fromSignup: true } });
         }, 1500);
       } else {
         setError(data.message || 'Registration failed. Try again.');
@@ -303,7 +303,7 @@ export default function SignUpPage() {
       {/* Success Popup */}
       <Snackbar open={showSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert severity="success" sx={{ width: '100%', background: '#10b981', color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
-          Account created successfully! Redirecting...
+          Account created successfully! Redirecting to login...
         </Alert>
       </Snackbar>
     </Box>
