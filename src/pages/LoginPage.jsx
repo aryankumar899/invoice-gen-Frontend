@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IonPage, IonContent } from '@ionic/react';
 import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -175,7 +176,9 @@ export default function LoginPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', p: 2 }}>
+    <IonPage>
+      <IonContent>
+        <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', p: 2 }}>
       {/* Background Glow */}
       <Box sx={{
         position: 'absolute',
@@ -447,6 +450,7 @@ export default function LoginPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+      </IonContent>
+    </IonPage>
   );
 }

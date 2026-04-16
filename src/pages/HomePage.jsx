@@ -7,16 +7,20 @@ import Testimonials from '../components/Testimonials';
 import FAQ from '../components/FAQ';
 import FooterCTA from '../components/FooterCTA';
 
+import { IonPage, IonContent } from '@ionic/react';
+
 export default function HomePage() {
   return (
-    <>
-      <Header />
-      <Hero />
-      <DashboardPreview />
-      <Features />
-      <Testimonials />
-      <FAQ />
-      <FooterCTA />
-    </>
+    <IonPage>
+      <IonContent>
+        <Header />
+        <Hero />
+        <DashboardPreview />
+        <Features />
+        <Testimonials />
+        <FAQ />
+        <FooterCTA />
+      </IonContent>
+    </IonPage>
   );
 }

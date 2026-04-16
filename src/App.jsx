@@ -1,4 +1,5 @@
 import React from 'react';
+import { setupIonicReact, IonApp } from '@ionic/react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -24,6 +25,15 @@ import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
 
+/* Core CSS required for Ionic components to work properly */
+import '@ionic/react/css/core.css';
+/* Basic CSS for apps built with Ionic */
+import '@ionic/react/css/normalize.css';
+import '@ionic/react/css/structure.css';
+import '@ionic/react/css/typography.css';
+
+setupIonicReact();
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function App() {
@@ -32,37 +42,39 @@ export default function App() {
   }
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || 'missing-id'}>
-      <ThemeProvider theme={theme}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <CssBaseline />
-          <Router>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              
-              {/* Protected Dashboard Routes */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<DashboardHome />} />
-                <Route path="create" element={<CreateInvoice />} />
-                <Route path="invoices" element={<MyInvoices />} />
-                <Route path="invoice/:id" element={<InvoiceView />} />
-                <Route path="clients" element={<Clients />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
+    <IonApp>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || 'missing-id'}>
+        <ThemeProvider theme={theme}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <CssBaseline />
+            <Router>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                
+                {/* Protected Dashboard Routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<DashboardHome />} />
+                  <Route path="create" element={<CreateInvoice />} />
+                  <Route path="invoices" element={<MyInvoices />} />
+                  <Route path="invoice/:id" element={<InvoiceView />} />
+                  <Route path="clients" element={<Clients />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
 
-              {/* Catch-all route to handle typos like /lign */}
-              <Route path="*" element={<HomePage />} />
-            </Routes>
-          </Router>
-        </LocalizationProvider>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+                {/* Catch-all route to handle typos like /lign */}
+                <Route path="*" element={<HomePage />} />
+              </Routes>
+            </Router>
+          </LocalizationProvider>
+        </ThemeProvider>
+      </GoogleOAuthProvider>
+    </IonApp>
   );
 }
 
