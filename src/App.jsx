@@ -27,8 +27,12 @@ import '@fontsource/manrope/600.css';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function App() {
+  if (!GOOGLE_CLIENT_ID) {
+    console.warn("⚠️ VITE_GOOGLE_CLIENT_ID is missing. Google Login will not work.");
+  }
+
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || 'missing-id'}>
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <CssBaseline />
