@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Invoice Generator</string>
+    <string name="title_activity_main">Invoice Generator</string>
+    <string name="package_name">com.aryankumar899.invoicegen</string>
+    <string name="custom_url_scheme">com.aryankumar899.invoicegen</string>
+</resources>
