@@ -51,6 +51,9 @@ export default function App() {
                 <Route path="clients" element={<Clients />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
+
+              {/* Catch-all route to handle typos like /lign */}
+              <Route path="*" element={<HomePage />} />
             </Routes>
           </Router>
         </LocalizationProvider>
