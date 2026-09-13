@@ -28,7 +28,7 @@ function GoogleLoginButton({ navigate, setError, setIsLoading }) {
         }).then(r => r.json());
 
         // Build a fake-credential object our backend can verify via userinfo
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://invoice-generator-vfec.onrender.com'}/api/auth/google`, {
+        const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ accessToken: tokenResponse.access_token, userInfo })

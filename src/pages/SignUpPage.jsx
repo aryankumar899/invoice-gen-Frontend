@@ -25,7 +25,7 @@ function GoogleSignUpButton({ navigate, setError }) {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
         }).then(r => r.json());
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://invoice-generator-vfec.onrender.com'}/api/auth/google`, {
+        const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ accessToken: tokenResponse.access_token, userInfo })

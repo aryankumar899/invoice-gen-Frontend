@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
     setDevResetLink('');
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/forgotpassword`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
