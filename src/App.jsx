@@ -1,14 +1,16 @@
 import React from 'react';
 import { setupIonicReact, IonApp } from '@ionic/react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AppThemeProvider } from './context/ThemeContext';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
 import CreateInvoice from './pages/CreateInvoice';
@@ -17,13 +19,16 @@ import Clients from './pages/Clients';
 import Settings from './pages/Settings';
 import InvoiceView from './pages/InvoiceView';
 import ProtectedRoute from './components/ProtectedRoute';
-import theme from './theme';
+import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/600.css';
 import '@fontsource/space-grotesk/700.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/manrope/800.css';
+import './index.css';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -44,7 +49,7 @@ export default function App() {
   return (
     <IonApp>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || 'missing-id'}>
-        <ThemeProvider theme={theme}>
+        <AppThemeProvider>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <CssBaseline />
             <Router>
@@ -52,6 +57,8 @@ export default function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
                 
                 {/* Protected Dashboard Routes */}
                 <Route path="/dashboard" element={
@@ -72,7 +79,7 @@ export default function App() {
               </Routes>
             </Router>
           </LocalizationProvider>
-        </ThemeProvider>
+        </AppThemeProvider>
       </GoogleOAuthProvider>
     </IonApp>
   );

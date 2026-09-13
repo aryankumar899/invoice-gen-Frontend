@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  Box, Typography, Button, Grid, Chip, Paper, IconButton,
+  Box, Typography, Button, Chip, Paper, IconButton,
   Tooltip, CircularProgress, Snackbar, Alert, Divider
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -8,11 +8,16 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
 import PaletteIcon from '@mui/icons-material/Palette';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { downloadElementAsPdf } from '../utils/pdfExport';
+import UpiPayCard from '../components/UpiPayCard';
+import InvoiceFingerprint from '../components/InvoiceFingerprint';
+import { nudgeText, whatsappUrl } from '../utils/invoiceMagic';
+import {
+  LayoutLuxury, LayoutSplit, LayoutFrame, LayoutStripe, LayoutEditorial,
+} from '../components/invoiceLayoutsFancy';
 
-// ─── 50 Template Definitions ─────────────────────────────────────────────────
-// 10 Layouts × 5 Color Schemes = 50 Templates
+// ─── 100 Template Definitions ────────────────────────────────────────────────
+// 10 Layouts × 10 Color Schemes = 100 Templates
 
 const COLOR_SCHEMES = [
   { name: 'Violet',  primary: '#6366f1', secondary: '#ec4899', light: '#eef2ff', dark: '#1e1b4b', text: '#111' },
@@ -33,9 +38,14 @@ const LAYOUTS = [
   { id: 3, label: 'Bold' },
   { id: 4, label: 'Sidebar' },
   { id: 5, label: 'Modern' },
+  { id: 6, label: 'Luxury' },
+  { id: 7, label: 'Split' },
+  { id: 8, label: 'Frame' },
+  { id: 9, label: 'Stripe' },
+  { id: 10, label: 'Editorial' },
 ];
 
-// Generate all 50 templates
+// Generate all 100 templates
 export const TEMPLATES = [];
 LAYOUTS.forEach(layout => {
   COLOR_SCHEMES.forEach(scheme => {
@@ -55,17 +65,28 @@ const fmt = (n, cur) => `${cur}${Number(n || 0).toFixed(2)}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
 // ─── Layout 1: MINIMAL ───────────────────────────────────────────────────────
+const pdfFont = {
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  letterSpacing: '0px',
+  wordBreak: 'normal',
+  '& *': {
+    fontFamily: 'Arial, Helvetica, sans-serif !important',
+    letterSpacing: '0px !important',
+    wordBreak: 'normal',
+  },
+};
+
 function LayoutMinimal({ inv, cfg, currency }) {
   const sub = (inv.items||[]).reduce((s,i)=>s+Number(i.qty)*Number(i.rate),0);
   const tax = sub * (inv.tax||0)/100;
   const total = sub + tax;
   return (
-    <Box sx={{ background:'#fff', color:'#111', fontFamily:"'Inter','Helvetica Neue',sans-serif", width:794, minHeight:1123, p:'72px 80px', boxSizing:'border-box' }}>
+    <Box sx={{ background:'#fff', color:'#111', ...pdfFont, width:794, minHeight:1123, p:'72px 80px', boxSizing:'border-box' }}>
       {/* Header */}
       <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:6 }}>
         <Box>
-          <Typography sx={{ fontSize:11, fontWeight:700, letterSpacing:3, textTransform:'uppercase', color:cfg.primary, mb:1 }}>Invoice</Typography>
-          <Typography sx={{ fontSize:32, fontWeight:800, color:'#0f172a', letterSpacing:-1, lineHeight:1 }}>
+          <Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', color:cfg.primary, mb:1 }}>Invoice</Typography>
+          <Typography sx={{ fontSize:32, fontWeight:800, color:'#0f172a', lineHeight:1.15 }}>
             {inv.billFrom?.companyName || inv.billFrom?.name || 'Your Company'}
           </Typography>
         </Box>
@@ -77,41 +98,44 @@ function LayoutMinimal({ inv, cfg, currency }) {
       </Box>
 
       {/* Parties */}
-      <Grid container spacing={6} sx={{ mb:5 }}>
-        <Grid item xs={6}>
-          <Typography sx={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:2, color:'#94a3b8', mb:1.5 }}>From</Typography>
+      <Box sx={{ display:'flex', mb:5 }}>
+        <Box sx={{ width:'50%', pr:4, boxSizing:'border-box' }}>
+          <Typography sx={{ fontSize:10, fontWeight:700, textTransform:'uppercase', color:'#94a3b8', mb:1.5 }}>From</Typography>
           <Typography sx={{ fontSize:14, fontWeight:600, color:'#0f172a' }}>{inv.billFrom?.name}</Typography>
           {inv.billFrom?.email && <Typography sx={{ fontSize:13, color:'#64748b' }}>{inv.billFrom.email}</Typography>}
           {inv.billFrom?.phone && <Typography sx={{ fontSize:13, color:'#64748b' }}>{inv.billFrom.phone}</Typography>}
           {inv.billFrom?.address && <Typography sx={{ fontSize:13, color:'#64748b', mt:0.5 }}>{inv.billFrom.address}</Typography>}
-        </Grid>
-        <Grid item xs={6}>
-          <Typography sx={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:2, color:'#94a3b8', mb:1.5 }}>To</Typography>
+        </Box>
+        <Box sx={{ width:'50%', boxSizing:'border-box' }}>
+          <Typography sx={{ fontSize:10, fontWeight:700, textTransform:'uppercase', color:'#94a3b8', mb:1.5 }}>To</Typography>
           <Typography sx={{ fontSize:14, fontWeight:600, color:'#0f172a' }}>{inv.clientName}</Typography>
           {inv.clientEmail && <Typography sx={{ fontSize:13, color:'#64748b' }}>{inv.clientEmail}</Typography>}
           {inv.clientAddress && <Typography sx={{ fontSize:13, color:'#64748b', mt:0.5 }}>{inv.clientAddress}</Typography>}
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       <Box sx={{ height:1, background:'#e2e8f0', mb:4 }} />
 
-      {/* Table Header */}
-      <Grid container sx={{ mb:2 }}>
-        <Grid item xs={6}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#94a3b8' }}>Description</Typography></Grid>
-        <Grid item xs={2} sx={{ textAlign:'center' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#94a3b8' }}>Qty</Typography></Grid>
-        <Grid item xs={2} sx={{ textAlign:'right' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#94a3b8' }}>Rate</Typography></Grid>
-        <Grid item xs={2} sx={{ textAlign:'right' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#94a3b8' }}>Amount</Typography></Grid>
-      </Grid>
-
-      {/* Items */}
-      {(inv.items||[]).map((item,i) => (
-        <Grid key={i} container sx={{ py:1.5, borderBottom:'1px solid #f1f5f9', '&:last-child':{borderBottom:'none'} }}>
-          <Grid item xs={6}><Typography sx={{ fontSize:14, color:'#334155' }}>{item.desc || '—'}</Typography></Grid>
-          <Grid item xs={2} sx={{ textAlign:'center' }}><Typography sx={{ fontSize:14, color:'#64748b' }}>{item.qty}</Typography></Grid>
-          <Grid item xs={2} sx={{ textAlign:'right' }}><Typography sx={{ fontSize:14, color:'#64748b' }}>{fmt(item.rate, currency)}</Typography></Grid>
-          <Grid item xs={2} sx={{ textAlign:'right' }}><Typography sx={{ fontSize:14, fontWeight:600, color:'#0f172a' }}>{fmt(Number(item.qty)*Number(item.rate), currency)}</Typography></Grid>
-        </Grid>
-      ))}
+      <Box component="table" sx={{ width:'100%', borderCollapse:'collapse', tableLayout:'fixed' }}>
+        <Box component="thead">
+          <Box component="tr">
+            <Box component="th" sx={{ textAlign:'left', pb:1.5, width:'46%' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', color:'#94a3b8' }}>Description</Typography></Box>
+            <Box component="th" sx={{ textAlign:'center', pb:1.5, width:'18%' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', color:'#94a3b8' }}>Qty</Typography></Box>
+            <Box component="th" sx={{ textAlign:'right', pb:1.5, width:'18%' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', color:'#94a3b8' }}>Rate</Typography></Box>
+            <Box component="th" sx={{ textAlign:'right', pb:1.5, width:'18%' }}><Typography sx={{ fontSize:11, fontWeight:700, textTransform:'uppercase', color:'#94a3b8' }}>Amount</Typography></Box>
+          </Box>
+        </Box>
+        <Box component="tbody">
+          {(inv.items||[]).map((item,i) => (
+            <Box component="tr" key={i}>
+              <Box component="td" sx={{ py:1.5, borderBottom:'1px solid #f1f5f9' }}><Typography sx={{ fontSize:14, color:'#334155' }}>{item.desc || '—'}</Typography></Box>
+              <Box component="td" sx={{ py:1.5, borderBottom:'1px solid #f1f5f9', textAlign:'center' }}><Typography sx={{ fontSize:14, color:'#64748b' }}>{item.qty}</Typography></Box>
+              <Box component="td" sx={{ py:1.5, borderBottom:'1px solid #f1f5f9', textAlign:'right' }}><Typography sx={{ fontSize:14, color:'#64748b' }}>{fmt(item.rate, currency)}</Typography></Box>
+              <Box component="td" sx={{ py:1.5, borderBottom:'1px solid #f1f5f9', textAlign:'right' }}><Typography sx={{ fontSize:14, fontWeight:600, color:'#0f172a' }}>{fmt(Number(item.qty)*Number(item.rate), currency)}</Typography></Box>
+            </Box>
+          ))}
+        </Box>
+      </Box>
 
       {/* Totals */}
       <Box sx={{ display:'flex', justifyContent:'flex-end', mt:4 }}>
@@ -147,7 +171,7 @@ function LayoutClassic({ inv, cfg, currency }) {
   const tax = sub * (inv.tax||0)/100;
   const total = sub + tax;
   return (
-    <Box sx={{ background:'#fff', color:'#111', fontFamily:"'Inter','Helvetica Neue',sans-serif", width:794, minHeight:1123, boxSizing:'border-box' }}>
+    <Box sx={{ background:'#fff', color:'#111', ...pdfFont, width:794, minHeight:1123, boxSizing:'border-box' }}>
       {/* Colored Header Band */}
       <Box sx={{ background:cfg.primary, py:'40px', px:'56px' }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -237,7 +261,7 @@ function LayoutBold({ inv, cfg, currency }) {
   const tax = sub * (inv.tax||0)/100;
   const total = sub + tax;
   return (
-    <Box sx={{ background:'#fff', fontFamily:"'Inter','Helvetica Neue',sans-serif", width:794, minHeight:1123, boxSizing:'border-box', display:'flex' }}>
+    <Box sx={{ background:'#fff', ...pdfFont, width:794, minHeight:1123, boxSizing:'border-box', display:'flex' }}>
       {/* Left Sidebar */}
       <Box sx={{ width:220, background:cfg.dark||cfg.primary, display:'flex', flexDirection:'column', p:'48px 28px', flexShrink:0 }}>
         <Box sx={{ width:52, height:52, background:`linear-gradient(135deg, ${cfg.primary}, ${cfg.secondary})`, borderRadius:2, display:'flex', alignItems:'center', justifyContent:'center', mb:3 }}>
@@ -312,7 +336,7 @@ function LayoutSidebar({ inv, cfg, currency }) {
   const tax = sub * (inv.tax||0)/100;
   const total = sub + tax;
   return (
-    <Box sx={{ background:'#fff', fontFamily:"'Inter','Helvetica Neue',sans-serif", width:794, minHeight:1123, boxSizing:'border-box' }}>
+    <Box sx={{ background:'#fff', ...pdfFont, width:794, minHeight:1123, boxSizing:'border-box' }}>
       {/* Top Accent Line */}
       <Box sx={{ height:6, background:`linear-gradient(90deg, ${cfg.primary}, ${cfg.secondary})` }} />
 
@@ -330,24 +354,24 @@ function LayoutSidebar({ inv, cfg, currency }) {
         </Box>
 
         {/* Parties Row */}
-        <Grid container spacing={4} sx={{ mb:4, pb:4, borderBottom:`2px solid ${cfg.light}` }}>
-          <Grid item xs={4}>
-            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:2, color:'#94a3b8', mb:1 }}>Billed From</Typography>
+        <Box sx={{ display:'flex', mb:4, pb:4, borderBottom:`2px solid ${cfg.light}` }}>
+          <Box sx={{ width:'33.33%', pr:2, boxSizing:'border-box' }}>
+            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', color:'#94a3b8', mb:1 }}>Billed From</Typography>
             <Typography sx={{ fontWeight:700, fontSize:14 }}>{inv.billFrom?.name}</Typography>
             <Typography sx={{ fontSize:12, color:'#64748b', mt:0.5 }}>{inv.billFrom?.address}</Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:2, color:'#94a3b8', mb:1 }}>Billed To</Typography>
+          </Box>
+          <Box sx={{ width:'33.33%', pr:2, boxSizing:'border-box' }}>
+            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', color:'#94a3b8', mb:1 }}>Billed To</Typography>
             <Typography sx={{ fontWeight:700, fontSize:14 }}>{inv.clientName}</Typography>
             <Typography sx={{ fontSize:12, color:'#64748b' }}>{inv.clientEmail}</Typography>
             <Typography sx={{ fontSize:12, color:'#64748b', mt:0.5 }}>{inv.clientAddress}</Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:2, color:'#94a3b8', mb:1 }}>Dates</Typography>
+          </Box>
+          <Box sx={{ width:'33.33%', boxSizing:'border-box' }}>
+            <Typography sx={{ fontSize:9, fontWeight:700, textTransform:'uppercase', color:'#94a3b8', mb:1 }}>Dates</Typography>
             <Typography sx={{ fontSize:12, color:'#334155' }}>Issued: {fmtDate(inv.date)}</Typography>
             <Typography sx={{ fontSize:12, color:cfg.primary, fontWeight:600, mt:0.5 }}>Due: {fmtDate(inv.dueDate)}</Typography>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Items */}
         <Box sx={{ mb:4 }}>
@@ -392,7 +416,7 @@ function LayoutModern({ inv, cfg, currency }) {
   const tax = sub * (inv.tax||0)/100;
   const total = sub + tax;
   return (
-    <Box sx={{ background:'#fff', fontFamily:"'Inter','Helvetica Neue',sans-serif", width:794, minHeight:1123, boxSizing:'border-box' }}>
+    <Box sx={{ background:'#fff', ...pdfFont, width:794, minHeight:1123, boxSizing:'border-box' }}>
       {/* Hero Header */}
       <Box sx={{ background:`linear-gradient(135deg, ${cfg.primary} 0%, ${cfg.secondary} 100%)`, p:'48px 56px', position:'relative', overflow:'hidden' }}>
         <Box sx={{ position:'absolute', top:-40, right:-40, width:200, height:200, borderRadius:'50%', background:'rgba(255,255,255,0.08)' }} />
@@ -481,6 +505,11 @@ function InvoiceTemplate({ inv, templateId, currency }) {
   if (tmpl.layoutId === 3) return <LayoutBold {...props} />;
   if (tmpl.layoutId === 4) return <LayoutSidebar {...props} />;
   if (tmpl.layoutId === 5) return <LayoutModern {...props} />;
+  if (tmpl.layoutId === 6) return <LayoutLuxury {...props} />;
+  if (tmpl.layoutId === 7) return <LayoutSplit {...props} />;
+  if (tmpl.layoutId === 8) return <LayoutFrame {...props} />;
+  if (tmpl.layoutId === 9) return <LayoutStripe {...props} />;
+  if (tmpl.layoutId === 10) return <LayoutEditorial {...props} />;
   return <LayoutMinimal {...props} />;
 }
 
@@ -512,13 +541,7 @@ export default function InvoiceView() {
   const handleDownloadPDF = async () => {
     setIsGenerating(true);
     try {
-      const el = invoiceRef.current;
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pw = pdf.internal.pageSize.getWidth();
-      const ph = (canvas.height * pw) / canvas.width;
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pw, Math.min(ph, 297));
-      pdf.save(`${invoice.invoiceId || 'invoice'}.pdf`);
+      await downloadElementAsPdf(invoiceRef.current, `${invoice.invoiceId || 'invoice'}.pdf`);
       setSnackbar({ open: true, message: 'PDF downloaded!', severity: 'success' });
     } catch { setSnackbar({ open: true, message: 'PDF generation failed', severity: 'error' }); }
     finally { setIsGenerating(false); }
@@ -535,18 +558,26 @@ export default function InvoiceView() {
       {/* Top Bar */}
       <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3, flexWrap:'wrap', gap:2 }}>
         <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
-          <IconButton onClick={() => navigate('/dashboard/invoices')} sx={{ color:'text.secondary', background:'rgba(255,255,255,0.05)', '&:hover':{ color:'#fff' } }}>
+          <IconButton onClick={() => navigate('/dashboard/invoices')} sx={{ color:'text.secondary', bgcolor:'action.hover' }}>
             <ArrowBackIcon />
           </IconButton>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight:800, color:'#fff' }}>{invoice.invoiceId}</Typography>
+            <Box sx={{ display:'flex', alignItems:'center', gap:1 }}>
+              <InvoiceFingerprint seed={invoice.invoiceId} />
+              <Typography variant="h5" sx={{ fontWeight:700, color:'text.primary' }}>{invoice.invoiceId}</Typography>
+            </Box>
             <Box sx={{ display:'flex', alignItems:'center', gap:1, mt:0.5 }}>
               <Chip label={invoice.status} size="small" sx={{ fontWeight:600, fontSize:'0.75rem', background: invoice.status==='Paid'?'rgba(16,185,129,0.15)':invoice.status==='Pending'?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)', color: invoice.status==='Paid'?'#10b981':invoice.status==='Pending'?'#f59e0b':'#ef4444' }} />
               <Typography variant="body2" sx={{ color:'text.secondary' }}>{invoice.clientName}</Typography>
             </Box>
           </Box>
         </Box>
-        <Box sx={{ display:'flex', gap:1.5 }}>
+        <Box sx={{ display:'flex', gap:1.5, flexWrap:'wrap' }}>
+          {invoice.status !== 'Paid' && (
+            <Button variant="outlined" color="success" onClick={() => window.open(whatsappUrl('', nudgeText(invoice, currency)), '_blank')}>
+              WhatsApp nudge
+            </Button>
+          )}
           <Button variant="outlined" startIcon={<EditIcon />} onClick={() => navigate(`/dashboard/create?edit=${id}`)} sx={{ color:'#3b82f6', borderColor:'#3b82f6', '&:hover':{ background:'rgba(59,130,246,0.1)' } }}>Edit</Button>
           <Button variant="contained" startIcon={isGenerating ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />} onClick={handleDownloadPDF} disabled={isGenerating} sx={{ background:'linear-gradient(135deg,#6366f1,#ec4899)', fontWeight:700 }}>
             {isGenerating ? 'Generating...' : 'Download PDF'}
@@ -556,11 +587,11 @@ export default function InvoiceView() {
 
       <Box sx={{ display:'flex', gap:3, alignItems:'flex-start' }}>
         {/* Template Panel */}
-        <Paper sx={{ width:240, flexShrink:0, background:'rgba(17,24,39,0.8)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:3, p:2.5, maxHeight:'calc(100vh - 180px)', overflowY:'auto' }}>
+        <Paper sx={{ width:240, flexShrink:0, bgcolor:'background.paper', border:'1px solid', borderColor:'divider', borderRadius:3, p:2.5, maxHeight:'calc(100vh - 180px)', overflowY:'auto', boxShadow:'none' }}>
           <Box sx={{ display:'flex', alignItems:'center', gap:1, mb:2 }}>
-            <PaletteIcon sx={{ color:'#6366f1', fontSize:18 }} />
-            <Typography sx={{ color:'#fff', fontWeight:700, fontSize:14 }}>Templates</Typography>
-            <Typography sx={{ color:'#64748b', fontSize:12, ml:'auto' }}>{TEMPLATES.length}</Typography>
+            <PaletteIcon sx={{ color:'primary.main', fontSize:18 }} />
+            <Typography sx={{ color:'text.primary', fontWeight:700, fontSize:14 }}>Templates</Typography>
+            <Typography sx={{ color:'text.secondary', fontSize:12, ml:'auto' }}>{TEMPLATES.length}</Typography>
           </Box>
 
           {/* Layout Filter */}
@@ -583,6 +614,9 @@ export default function InvoiceView() {
                   background:`linear-gradient(135deg, ${t.primary} 0%, ${t.secondary} 100%)`,
                   '&:hover': { transform:'scale(1.05)' }
                 }}>
+                  <Typography sx={{ position:'absolute', bottom:4, left:0, right:0, textAlign:'center', fontSize:8, color:'#fff', fontWeight:700, px:0.5 }}>
+                    {t.layoutName}
+                  </Typography>
                   {/* Mini preview */}
                   <Box sx={{ position:'absolute', top:3, left:3, right:3, height:2, background:'rgba(255,255,255,0.6)', borderRadius:0.5 }} />
                   <Box sx={{ position:'absolute', top:7, left:3, right:8, height:1, background:'rgba(255,255,255,0.3)', borderRadius:0.5 }} />
@@ -605,13 +639,34 @@ export default function InvoiceView() {
 
         {/* Invoice Preview */}
         <Box sx={{ flex:1, overflowX:'auto' }}>
+          {user.upiId && invoice.status !== 'Paid' && (
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+              <UpiPayCard
+                upiId={user.upiId}
+                name={user.companyName || user.name}
+                amount={invoice.totalAmount}
+                invoiceId={invoice.invoiceId}
+                currency={currency}
+              />
+            </Box>
+          )}
           <Paper sx={{ background:'#e5e7eb', borderRadius:3, p:4, display:'flex', justifyContent:'center' }}>
             <Box sx={{ transform:'scale(0.72)', transformOrigin:'top center', mb: '-250px' }}>
-              <Box ref={invoiceRef} sx={{ boxShadow:'0 20px 60px rgba(0,0,0,0.3)', borderRadius:2, overflow:'hidden' }}>
+              <Box sx={{ boxShadow:'0 20px 60px rgba(0,0,0,0.3)', borderRadius:2, overflow:'hidden' }}>
                 <InvoiceTemplate inv={invoice} templateId={selectedTemplate} currency={currency} />
               </Box>
             </Box>
           </Paper>
+        </Box>
+      </Box>
+
+      {/* Unscaled off-screen copy used for PDF capture */}
+      <Box
+        aria-hidden
+        sx={{ position:'fixed', left:-2000, top:0, width:794, pointerEvents:'none', zIndex:-1 }}
+      >
+        <Box ref={invoiceRef}>
+          <InvoiceTemplate inv={invoice} templateId={selectedTemplate} currency={currency} />
         </Box>
       </Box>
 

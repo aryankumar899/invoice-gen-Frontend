@@ -1,9 +1,12 @@
 import React from 'react';
-import { Box, Container, Typography, Button } from '@mui/material';
+import { Box, Container, Typography, Button, useTheme } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ThreeDCard from './ThreeDCard';
 
 export default function Hero() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box
       id="hero"
@@ -66,18 +69,19 @@ export default function Hero() {
                 mb: 2
               }}
             >
-              <Typography variant="caption" sx={{ color: '#a5b4fc', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <Typography sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: { xs: '0.8rem', md: '0.95rem' } }}>
                 Next Gen Financial Tools
               </Typography>
             </Box>
 
             <Typography 
-              variant="h1" 
+              component="div"
               sx={{ 
-                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
-                lineHeight: 1.1,
-                color: '#ffffff',
+                fontSize: { xs: '2.75rem', sm: '3.75rem', md: '4.75rem', lg: '5.5rem' },
+                lineHeight: 1.12,
+                color: 'text.primary',
                 fontWeight: 800,
+                letterSpacing: 0,
                 '& span': {
                   background: 'linear-gradient(to right, #6366f1, #ec4899)',
                   WebkitBackgroundClip: 'text',
@@ -89,7 +93,7 @@ export default function Hero() {
               <span>Modern Businesses 🚀</span>
             </Typography>
 
-            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400, maxWidth: '90%', lineHeight: 1.6, fontSize: { xs: '1rem', md: '1.25rem' } }}>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 500, maxWidth: '92%', lineHeight: 1.7, fontSize: { xs: '1.1rem', md: '1.4rem' } }}>
               Automate your billing process with AI. Generate intelligent invoices, track payments in real-time, and get actionable financial insights all in one minimal, fast dashboard.
             </Typography>
 
@@ -102,7 +106,7 @@ export default function Hero() {
                 sx={{ 
                   px: 4, 
                   py: 1.5, 
-                  fontSize: '1.1rem',
+                  fontSize: { xs: '1.15rem', md: '1.25rem' },
                   fontWeight: 700 
                 }}
               >
@@ -114,12 +118,12 @@ export default function Hero() {
                 sx={{ 
                   px: 4, 
                   py: 1.5, 
-                  fontSize: '1.1rem',
-                  color: '#fff',
-                  borderColor: 'rgba(255,255,255,0.2)',
+                  fontSize: { xs: '1.15rem', md: '1.25rem' },
+                  color: 'text.primary',
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
                   '&:hover': {
-                    borderColor: '#fff',
-                    background: 'rgba(255,255,255,0.05)'
+                    borderColor: 'text.primary',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
                   }
                 }}
               >
@@ -137,14 +141,14 @@ export default function Hero() {
                       height: 32, 
                       borderRadius: '50%', 
                       background: '#374151',
-                      border: '2px solid #030712',
+                      border: `2px solid ${theme.palette.background.default}`,
                       backgroundImage: `url(https://i.pravatar.cc/100?img=${i + 10})`,
                       backgroundSize: 'cover'
                     }} 
                   />
                 ))}
               </Box>
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              <Typography sx={{ color: 'text.secondary', fontWeight: 600, fontSize: { xs: '1rem', md: '1.1rem' } }}>
                 Joined by 10,000+ top companies
               </Typography>
             </Box>

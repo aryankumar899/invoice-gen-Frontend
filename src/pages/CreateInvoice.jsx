@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Paper, TextField, Button, Grid, IconButton, Divider, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Paper, TextField, Button, Grid, IconButton, Divider, Snackbar, Alert, Chip } from '@mui/material';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -13,8 +13,11 @@ import AddIcon from '@mui/icons-material/Add';
 import SendIcon from '@mui/icons-material/Send';
 import DownloadIcon from '@mui/icons-material/Download';
 import SaveIcon from '@mui/icons-material/Save';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { downloadElementAsPdf } from '../utils/pdfExport';
+import AiInvoiceDropzone from '../components/AiInvoiceDropzone';
+import CompletenessCompass from '../components/CompletenessCompass';
+import { itemMemory, findTwin, weaveNotes, luckySendWindow, dueDateWarning } from '../utils/invoiceMagic';
+import API_BASE_URL from '../config/api';
 
 export default function CreateInvoice() {
   const pdfRef = useRef(null);
@@ -51,7 +54,19 @@ export default function CreateInvoice() {
 
   const [items, setItems] = useState([{ id: 1, desc: '', qty: 1, rate: 0 }]);
   const [tax, setTax] = useState(10);
+  const [history, setHistory] = useState([]);
   
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/invoices`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (res.ok) setHistory(await res.json());
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
   useEffect(() => {
     if (editId) {
       const fetchInvoice = async () => {
@@ -113,20 +128,11 @@ export default function CreateInvoice() {
 
     // Add brief pause for rendering buffer
     await new Promise(resolve => setTimeout(resolve, 50));
-    const element = pdfRef.current;
-    
-    // Using scale 2 or 3 increases quality
-    const canvas = await html2canvas(element, { scale: 3, useCORS: true, logging: false });
-    const imgData = canvas.toDataURL('image/png');
-    
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    // A4 ratio
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${invoiceData.invoiceId || 'Invoice'}.pdf`);
-    setIsGenerating(false);
+    try {
+      await downloadElementAsPdf(pdfRef.current, `${invoiceData.invoiceId || 'Invoice'}.pdf`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const [isSaving, setIsSaving] = useState(false);
@@ -195,7 +201,7 @@ export default function CreateInvoice() {
     <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 0.5, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>New Invoice</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>New Invoice</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>Create and send a professional invoice.</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
@@ -212,8 +218,91 @@ export default function CreateInvoice() {
         </Box>
       </Box>
 
+      <CompletenessCompass invoiceData={invoiceData} items={items} billFrom={billFrom} bankDetails={bankDetails} upiId={user.upiId} />
+
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+        <Button
+          size="small"
+          variant="outlined"
+          disabled={!history[0]}
+          onClick={() => {
+            const last = history[0];
+            if (!last) return;
+            setInvoiceData((prev) => ({
+              ...prev,
+              clientName: last.clientName || '',
+              clientEmail: last.clientEmail || '',
+              clientAddress: last.clientAddress || '',
+              invoiceId: generateInvoiceId(),
+              date: new Date().toISOString().split('T')[0],
+              dueDate: '',
+              notes: last.notes || prev.notes,
+            }));
+            if (last.billFrom) setBillFrom((prev) => ({ ...prev, ...last.billFrom }));
+            if (last.bankDetails) setBankDetails((prev) => ({ ...prev, ...last.bankDetails }));
+            if (last.items?.length) setItems(last.items.map((item, i) => ({ ...item, id: Date.now() + i })));
+            if (last.tax !== undefined) setTax(last.tax);
+            showMessage('Twin forged from your last invoice. Dates and ID are fresh.', 'success');
+          }}
+        >
+          Twin last invoice
+        </Button>
+        {itemMemory(history).map((mem) => (
+          <Chip
+            key={mem.desc}
+            size="small"
+            label={`${mem.desc} · ${currency}${mem.rate}`}
+            onClick={() => setItems((prev) => [...prev, { id: Date.now(), desc: mem.desc, qty: 1, rate: mem.rate }])}
+          />
+        ))}
+      </Box>
+      {findTwin(history.filter((inv) => inv._id !== editId), invoiceData.clientName, total) && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Twin radar: a similar bill for {invoiceData.clientName} already exists this week.
+        </Alert>
+      )}
+
+      <Box sx={{ mb: 3 }}>
+        <AiInvoiceDropzone
+          mode="invoice"
+          onError={showMessage}
+          onExtracted={(data) => {
+            if (data.billFrom) {
+              setBillFrom((prev) => ({
+                name: data.billFrom.name || prev.name,
+                companyName: data.billFrom.companyName || prev.companyName,
+                email: data.billFrom.email || prev.email,
+                phone: data.billFrom.phone || prev.phone,
+                address: data.billFrom.address || prev.address,
+              }));
+            }
+            setInvoiceData((prev) => ({
+              ...prev,
+              clientName: data.client?.name || prev.clientName,
+              clientEmail: data.client?.email || prev.clientEmail,
+              clientAddress: data.client?.address || prev.clientAddress,
+              invoiceId: data.invoiceId || prev.invoiceId,
+              date: data.date || prev.date,
+              dueDate: data.dueDate || prev.dueDate,
+              notes: data.notes || prev.notes,
+            }));
+            if (data.bankDetails) {
+              setBankDetails((prev) => ({
+                bankName: data.bankDetails.bankName || prev.bankName,
+                accountName: data.bankDetails.accountName || prev.accountName,
+                accountNumber: data.bankDetails.accountNumber || prev.accountNumber,
+                routingNumber: data.bankDetails.routingNumber || prev.routingNumber,
+              }));
+            }
+            if (data.items?.length) setItems(data.items);
+            if (data.tax !== undefined) setTax(data.tax);
+            showMessage('Invoice details filled from the uploaded file.', 'success');
+          }}
+        />
+      </Box>
+
       {/* Paper 1: Bill From & Invoice Details */}
-      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', mb: 4 }}>
+      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 'none', mb: 4 }}>
         <Grid container spacing={{ xs: 3, md: 4 }}>
 
           {/* Billed From */}
@@ -221,7 +310,7 @@ export default function CreateInvoice() {
             <Typography variant="overline" sx={{ color: '#10b981', fontWeight: 700, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
               <BusinessIcon fontSize="small" /> Billed From
             </Typography>
-            <TextField fullWidth placeholder="Your Name" variant="standard" value={billFrom.name} onChange={(e) => handleBillFromChange('name', e.target.value)} sx={{ mt: 1, '& .MuiInputBase-input': { color: '#fff', fontSize: '1.1rem', fontWeight: 600 } }} InputProps={{ disableUnderline: false }} />
+            <TextField fullWidth placeholder="Your Name" variant="standard" value={billFrom.name} onChange={(e) => handleBillFromChange('name', e.target.value)} sx={{ mt: 1, '& .MuiInputBase-input': { fontSize: '1.1rem', fontWeight: 600 } }} InputProps={{ disableUnderline: false }} />
             <TextField fullWidth placeholder="Company Name" variant="standard" value={billFrom.companyName} onChange={(e) => handleBillFromChange('companyName', e.target.value)} sx={{ mt: 2, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
             <TextField fullWidth placeholder="Your Email" variant="standard" value={billFrom.email} onChange={(e) => handleBillFromChange('email', e.target.value)} sx={{ mt: 2, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
             <TextField fullWidth placeholder="Phone" variant="standard" value={billFrom.phone} onChange={(e) => handleBillFromChange('phone', e.target.value)} sx={{ mt: 2, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
@@ -233,7 +322,7 @@ export default function CreateInvoice() {
             <Typography variant="overline" sx={{ color: '#6366f1', fontWeight: 700, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
               <PersonIcon fontSize="small" /> Billed To
             </Typography>
-            <TextField fullWidth placeholder="Client Name" variant="standard" value={invoiceData.clientName} onChange={(e) => handleChange('clientName', e.target.value)} sx={{ mt: 1, '& .MuiInputBase-input': { color: '#fff', fontSize: '1.1rem', fontWeight: 600 } }} InputProps={{ disableUnderline: false }} />
+            <TextField fullWidth placeholder="Client Name" variant="standard" value={invoiceData.clientName} onChange={(e) => handleChange('clientName', e.target.value)} sx={{ mt: 1, '& .MuiInputBase-input': { fontSize: '1.1rem', fontWeight: 600 } }} InputProps={{ disableUnderline: false }} />
             <TextField fullWidth placeholder="Client Email" variant="standard" value={invoiceData.clientEmail} onChange={(e) => handleChange('clientEmail', e.target.value)} sx={{ mt: 2, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
             <TextField fullWidth placeholder="Client Address" variant="standard" multiline rows={2} value={invoiceData.clientAddress} onChange={(e) => handleChange('clientAddress', e.target.value)} sx={{ mt: 2, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
           </Grid>
@@ -245,7 +334,7 @@ export default function CreateInvoice() {
              </Typography>
              <Box sx={{ display: 'flex', justifyContent: { md: 'flex-end' }, alignItems: 'center', mt: 1, gap: 2 }}>
                <Typography variant="body2" sx={{ color: 'text.secondary', width: { xs: 80, md: 100 }, flexShrink: 0 }}>Invoice #</Typography>
-               <TextField variant="outlined" size="small" value={invoiceData.invoiceId} onChange={(e) => handleChange('invoiceId', e.target.value)} sx={{ flex: 1, maxWidth: 200, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' } }} />
+               <TextField variant="outlined" size="small" value={invoiceData.invoiceId} onChange={(e) => handleChange('invoiceId', e.target.value)} sx={{ flex: 1, maxWidth: 200 }} />
              </Box>
              <Box sx={{ display: 'flex', justifyContent: { md: 'flex-end' }, alignItems: 'center', mt: 2, gap: 2 }}>
                <Typography variant="body2" sx={{ color: 'text.secondary', width: { xs: 80, md: 100 }, flexShrink: 0 }}>Date</Typography>
@@ -257,9 +346,9 @@ export default function CreateInvoice() {
                  }}
                  slotProps={{
                    textField: {
-                     size: "small",
-                     sx: { flex: 1, maxWidth: 200, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' }, svg: { color: '#fff' } }
-                   }
+                     size: 'small',
+                     sx: { flex: 1, maxWidth: 200 },
+                   },
                  }}
                />
              </Box>
@@ -273,9 +362,9 @@ export default function CreateInvoice() {
                  }}
                  slotProps={{
                    textField: {
-                     size: "small",
-                     sx: { flex: 1, maxWidth: 200, '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' }, svg: { color: '#fff' } }
-                   }
+                     size: 'small',
+                     sx: { flex: 1, maxWidth: 200 },
+                   },
                  }}
                />
              </Box>
@@ -284,8 +373,8 @@ export default function CreateInvoice() {
       </Paper>
 
       {/* Paper 2: Line Items */}
-      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', mb: 4 }}>
-        <Typography variant="h6" sx={{ color: '#fff', mb: 4, display: 'flex', alignItems: 'center', gap: 1, fontSize: { xs: '1rem', md: '1.25rem' } }}>
+      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 'none', mb: 4 }}>
+        <Typography variant="h6" sx={{ color: 'text.primary', mb: 4, display: 'flex', alignItems: 'center', gap: 1, fontSize: { xs: '1rem', md: '1.25rem' } }}>
           <FormatListBulletedIcon sx={{ color: '#10b981' }} /> Line Items
         </Typography>
         
@@ -299,19 +388,19 @@ export default function CreateInvoice() {
 
         {/* Items List */}
         {items.map((item) => (
-          <Box key={item.id} sx={{ mb: 2, p: { xs: 1.5, md: 2 }, background: 'rgba(0,0,0,0.2)', borderRadius: 2, position: 'relative' }}>
+          <Box key={item.id} sx={{ mb: 2, p: { xs: 1.5, md: 2 }, bgcolor: 'action.hover', borderRadius: 2, position: 'relative' }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={6}>
-                <TextField fullWidth placeholder="Description of service or product..." variant="standard" value={item.desc} onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)} InputProps={{ disableUnderline: true, sx: { color: '#fff', fontWeight: 500 } }} />
+                <TextField fullWidth placeholder="Description of service or product..." variant="standard" value={item.desc} onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)} InputProps={{ disableUnderline: true, sx: { color: 'text.primary', fontWeight: 500 } }} />
               </Grid>
               <Grid item xs={4} md={2}>
-                <TextField fullWidth type="number" placeholder="Qty" variant="outlined" size="small" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' } }} />
+                <TextField fullWidth type="number" placeholder="Qty" variant="outlined" size="small" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', e.target.value)} />
               </Grid>
               <Grid item xs={4} md={2}>
-                <TextField fullWidth type="number" placeholder="Rate" variant="outlined" size="small" value={item.rate} onChange={(e) => handleItemChange(item.id, 'rate', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' } }} />
+                <TextField fullWidth type="number" placeholder="Rate" variant="outlined" size="small" value={item.rate} onChange={(e) => handleItemChange(item.id, 'rate', e.target.value)} />
               </Grid>
               <Grid item xs={3} md={2} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>
+                <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   {currency}{(Number(item.qty) * Number(item.rate)).toFixed(2)}
                 </Typography>
               </Grid>
@@ -338,7 +427,7 @@ export default function CreateInvoice() {
       </Paper>
 
       {/* Paper 3: Details & Calculations */}
-      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)', mb: 4 }}>
+      <Paper sx={{ p: { xs: 2, md: 5 }, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 'none', mb: 4 }}>
         {/* Bank & Totals Section */}
         <Grid container spacing={4} justifyContent="space-between">
           <Grid item xs={12} md={6}>
@@ -346,44 +435,64 @@ export default function CreateInvoice() {
             <Typography variant="subtitle2" sx={{ color: '#10b981', mb: 2, fontWeight: 700, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
               <AccountBalanceIcon fontSize="small" /> Bank Transfer Details
             </Typography>
-            <Box sx={{ background: 'rgba(0,0,0,0.2)', p: { xs: 2, md: 3 }, borderRadius: 3, mb: 4 }}>
+            <Box sx={{ bgcolor: 'action.hover', p: { xs: 2, md: 3 }, borderRadius: 3, mb: 4 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Bank Name" variant="standard" size="small" value={bankDetails.bankName} onChange={(e) => handleBankChange('bankName', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' } }} InputLabelProps={{ sx: { color: 'text.secondary' } }} />
+                  <TextField fullWidth label="Bank Name" variant="standard" size="small" value={bankDetails.bankName} onChange={(e) => handleBankChange('bankName', e.target.value)} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Account Name" variant="standard" size="small" value={bankDetails.accountName} onChange={(e) => handleBankChange('accountName', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' } }} InputLabelProps={{ sx: { color: 'text.secondary' } }} />
+                  <TextField fullWidth label="Account Name" variant="standard" size="small" value={bankDetails.accountName} onChange={(e) => handleBankChange('accountName', e.target.value)} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Account Number" variant="standard" size="small" value={bankDetails.accountNumber} onChange={(e) => handleBankChange('accountNumber', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' } }} InputLabelProps={{ sx: { color: 'text.secondary' } }} />
+                  <TextField fullWidth label="Account Number" variant="standard" size="small" value={bankDetails.accountNumber} onChange={(e) => handleBankChange('accountNumber', e.target.value)} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Routing/IFSC Code" variant="standard" size="small" value={bankDetails.routingNumber} onChange={(e) => handleBankChange('routingNumber', e.target.value)} sx={{ '& .MuiInputBase-input': { color: '#fff' } }} InputLabelProps={{ sx: { color: 'text.secondary' } }} />
+                  <TextField fullWidth label="Routing/IFSC Code" variant="standard" size="small" value={bankDetails.routingNumber} onChange={(e) => handleBankChange('routingNumber', e.target.value)} />
                 </Grid>
               </Grid>
             </Box>
 
             <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1, fontWeight: 600 }}>Notes / Terms</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+              {[
+                { id: 'warm', label: 'Warm' },
+                { id: 'formal', label: 'Formal' },
+                { id: 'strict', label: 'Strict' },
+              ].map((tone) => (
+                <Chip
+                  key={tone.id}
+                  size="small"
+                  label={`Tone · ${tone.label}`}
+                  onClick={() => handleChange('notes', weaveNotes(tone.id, { ...invoiceData, currency, total }))}
+                />
+              ))}
+            </Box>
             <TextField fullWidth multiline rows={4} value={invoiceData.notes} onChange={(e) => handleChange('notes', e.target.value)} variant="outlined" sx={{ '& .MuiInputBase-input': { color: 'text.secondary' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' } }} />
+            {dueDateWarning(invoiceData.dueDate) && (
+              <Alert severity="info" sx={{ mt: 1.5 }}>{dueDateWarning(invoiceData.dueDate)}</Alert>
+            )}
+            <Typography sx={{ mt: 1.5, fontSize: 12, color: 'text.secondary' }}>
+              Lucky send window from your history: {luckySendWindow(history).label}
+            </Typography>
           </Grid>
           
           <Grid item xs={12} md={5}>
-            <Box sx={{ background: 'rgba(0,0,0,0.2)', borderRadius: 3, p: { xs: 2, md: 3 } }}>
+            <Box sx={{ bgcolor: 'action.hover', borderRadius: 3, p: { xs: 2, md: 3 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>Subtotal</Typography>
-                <Typography sx={{ color: '#fff', fontWeight: 600 }}>{currency}{subtotal.toFixed(2)}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{currency}{subtotal.toFixed(2)}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>Tax (%)</Typography>
-                <TextField type="number" variant="outlined" size="small" value={tax} onChange={(e) => setTax(e.target.value)} sx={{ width: 80, '& .MuiInputBase-input': { color: '#fff', textAlign: 'right' }, fieldset: { borderColor: 'rgba(255,255,255,0.1)' } }} />
+                <TextField type="number" variant="outlined" size="small" value={tax} onChange={(e) => setTax(e.target.value)} sx={{ width: 80, '& .MuiInputBase-input': { textAlign: 'right' } }} />
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>Tax Amount</Typography>
-                <Typography sx={{ color: '#fff', fontWeight: 600 }}>{currency}{taxAmount.toFixed(2)}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{currency}{taxAmount.toFixed(2)}</Typography>
               </Box>
               <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 800 }}>Total</Typography>
+                <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 800 }}>Total</Typography>
                 <Typography variant="h6" sx={{ color: '#6366f1', fontWeight: 800 }}>{currency}{total.toFixed(2)}</Typography>
               </Box>
             </Box>
@@ -392,7 +501,7 @@ export default function CreateInvoice() {
       </Paper>
 
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', background: '#1f2937', color: '#fff' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', background: '#1f2937', color: 'text.primary' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
@@ -400,12 +509,14 @@ export default function CreateInvoice() {
       {/* HIDDEN PDF DOM TEMPLATE */}
       <Box sx={{ position: 'absolute', top: -9999, left: -9999, zIndex: -100 }}>
         <Box ref={pdfRef} sx={{ 
-          width: '210mm', minHeight: '297mm', background: '#ffffff', color: '#111827', p: '20mm', boxSizing: 'border-box'
+          width: '210mm', minHeight: '297mm', background: '#ffffff', color: '#111827', p: '20mm', boxSizing: 'border-box',
+          fontFamily: 'Arial, Helvetica, sans-serif', letterSpacing: '0px',
+          '& *': { fontFamily: 'Arial, Helvetica, sans-serif !important', letterSpacing: '0px !important', wordBreak: 'normal' }
         }}>
           {/* Business Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #f3f4f6', pb: 4, mb: 5 }}>
             <Box>
-              <Typography sx={{ fontSize: '2.5rem', fontWeight: 800, color: '#111827', letterSpacing: '-1px', lineHeight: 1 }}>INVOICE</Typography>
+              <Typography sx={{ fontSize: '2.5rem', fontWeight: 800, color: '#111827', lineHeight: 1.15 }}>INVOICE</Typography>
               <Typography sx={{ fontSize: '1rem', color: '#6b7280', mt: 1 }}>{invoiceData.invoiceId}</Typography>
             </Box>
             <Box sx={{ textAlign: 'right' }}>

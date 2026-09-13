@@ -44,11 +44,12 @@ const autoScrollItems = [...testimonials, ...testimonials];
 
 export default function Testimonials() {
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   return (
-    <Box id="testimonials" sx={{ py: { xs: 10, md: 15 }, background: 'rgba(3, 7, 18, 0.5)', overflow: 'hidden' }}>
+    <Box id="testimonials" sx={{ py: { xs: 10, md: 15 }, background: isDark ? 'rgba(3, 7, 18, 0.5)' : 'rgba(241, 245, 249, 0.5)', overflow: 'hidden' }}>
       <Container maxWidth="xl" sx={{ mb: 6 }}>
-        <Typography variant="h2" sx={{ textAlign: 'center' }}>
+        <Typography component="div" sx={{ textAlign: 'center', color: 'text.primary', fontWeight: 800, letterSpacing: 0, fontSize: { xs: '2rem', md: '3.4rem' } }}>
           Loved by builders & makers
         </Typography>
       </Container>
@@ -71,11 +72,11 @@ export default function Testimonials() {
           },
           '&::before': {
             left: 0,
-            background: 'linear-gradient(to right, #030712 0%, transparent 100%)'
+            background: `linear-gradient(to right, ${isDark ? '#030712' : '#ffffff'} 0%, transparent 100%)`
           },
           '&::after': {
             right: 0,
-            background: 'linear-gradient(to left, #030712 0%, transparent 100%)'
+            background: `linear-gradient(to left, ${isDark ? '#030712' : '#ffffff'} 0%, transparent 100%)`
           }
         }}
       >
@@ -102,26 +103,29 @@ export default function Testimonials() {
               display: 'flex', 
               flexDirection: 'column', 
               gap: 3,
-              background: 'linear-gradient(145deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.9) 100%)',
-              border: '1px solid rgba(255,255,255,0.05)',
+              background: isDark 
+                ? 'linear-gradient(145deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.9) 100%)' 
+                : 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+              border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.06)',
+              boxShadow: isDark ? 'none' : '0 4px 20px rgba(0,0,0,0.02)',
               transition: 'all 0.3s ease',
               whiteSpace: 'normal', // Allow text to wrap inside the card
               flexShrink: 0,
               '&:hover': {
                 transform: 'translateY(-5px)',
                 borderColor: 'rgba(99, 102, 241, 0.4)',
-                boxShadow: '0 10px 40px -10px rgba(99, 102, 241, 0.2)'
+                boxShadow: isDark ? '0 10px 40px -10px rgba(99, 102, 241, 0.2)' : '0 10px 25px rgba(99, 102, 241, 0.08)'
               }
             }}>
               <Rating value={test.rating} readOnly sx={{ color: '#f59e0b' }} />
-              <Typography variant="body1" sx={{ color: 'text.primary', fontSize: '1.05rem', flex: 1, fontStyle: 'italic', lineHeight: 1.7 }}>
+              <Typography sx={{ color: 'text.primary', fontSize: { xs: '1.1rem', md: '1.2rem' }, flex: 1, fontStyle: 'italic', lineHeight: 1.75 }}>
                 "{test.content}"
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
                 <Avatar src={test.avatar} sx={{ width: 48, height: 48 }} />
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#fff' }}>{test.name}</Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{test.role}</Typography>
+                  <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.05rem' }}>{test.name}</Typography>
+                  <Typography sx={{ color: 'text.secondary', fontSize: '0.95rem' }}>{test.role}</Typography>
                 </Box>
               </Box>
             </Card>

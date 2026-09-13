@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, TextField, Button, Grid, Avatar, Snackbar, Alert, MenuItem } from '@mui/material';
+import API_BASE_URL from '../config/api';
 
 export default function Settings() {
   const [profile, setProfile] = useState({
@@ -9,7 +10,8 @@ export default function Settings() {
     email: '',
     phone: '',
     address: '',
-    avatar: ''
+    avatar: '',
+    upiId: ''
   });
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -26,7 +28,8 @@ export default function Settings() {
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
-        avatar: user.avatar || ''
+        avatar: user.avatar || '',
+        upiId: user.upiId || ''
       });
     }
   }, []);
@@ -52,7 +55,7 @@ export default function Settings() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -76,16 +79,16 @@ export default function Settings() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 4, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>Settings</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 4, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>Settings</Typography>
 
-      <Paper sx={{ p: 4, background: 'rgba(17, 24, 39, 0.7)', backdropFilter: 'blur(20px)', borderRadius: 4, border: '1px solid rgba(255,255,255,0.05)' }}>
+      <Paper sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 3, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'center' }, mb: 4, gap: 3 }}>
           <Avatar src={profile.avatar} sx={{ width: { xs: 64, sm: 80 }, height: { xs: 64, sm: 80 }, background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)', fontSize: '2rem', flexShrink: 0 }}>
             {!profile.avatar && (profile.name ? profile.name.charAt(0).toUpperCase() : 'U')}
           </Avatar>
           <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-            <Typography variant="h6" sx={{ color: '#fff', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Profile Picture</Typography>
-            <Button component="label" variant="outlined" size="small" sx={{ mt: 1, color: '#fff', borderColor: 'rgba(255,255,255,0.2)', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+            <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Profile Picture</Typography>
+            <Button component="label" variant="outlined" size="small" sx={{ mt: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
               Upload New Image
               <input type="file" hidden accept="image/*" onChange={handleImageUpload} />
             </Button>
@@ -94,13 +97,13 @@ export default function Settings() {
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Full Name" name="name" value={profile.name} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
+            <TextField fullWidth label="Full Name" name="name" value={profile.name} onChange={handleChange} />
           </Grid>
           <Grid item xs={8} sm={4}>
-            <TextField fullWidth label="Company Name" name="companyName" value={profile.companyName} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
+            <TextField fullWidth label="Company Name" name="companyName" value={profile.companyName} onChange={handleChange} />
           </Grid>
           <Grid item xs={4} sm={2}>
-             <TextField select fullWidth label="Currency" name="currency" value={profile.currency} onChange={handleChange} sx={{ '& .MuiInputBase-input': { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } }, '& .MuiSvgIcon-root': { color: '#fff' } }}>
+             <TextField select fullWidth label="Currency" name="currency" value={profile.currency} onChange={handleChange}>
                <MenuItem value="₹">₹ (INR)</MenuItem>
                <MenuItem value="$">$ (USD)</MenuItem>
                <MenuItem value="€">€ (EUR)</MenuItem>
@@ -108,13 +111,16 @@ export default function Settings() {
              </TextField>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Email" name="email" value={profile.email} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
+            <TextField fullWidth label="Email" name="email" value={profile.email} onChange={handleChange} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Phone" name="phone" value={profile.phone} onChange={handleChange} sx={{ input: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
+            <TextField fullWidth label="Phone" name="phone" value={profile.phone} onChange={handleChange} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField fullWidth label="UPI ID (Snap Pay)" name="upiId" value={profile.upiId} onChange={handleChange} placeholder="name@upi" helperText="Shows a scan-to-pay QR on every invoice." />
           </Grid>
           <Grid item xs={12}>
-            <TextField fullWidth multiline rows={3} label="Address" name="address" value={profile.address} onChange={handleChange} sx={{ textarea: { color: '#fff' }, label: { color: 'text.secondary' }, '.MuiOutlinedInput-root': { fieldset: { borderColor: 'rgba(255,255,255,0.2)' } } }} />
+            <TextField fullWidth multiline rows={3} label="Address" name="address" value={profile.address} onChange={handleChange} />
           </Grid>
         </Grid>
         <Box sx={{ mt: 4, display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' } }}>

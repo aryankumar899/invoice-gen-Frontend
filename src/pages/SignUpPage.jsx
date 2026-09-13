@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, TextField, Button, Divider, Alert, Snackbar, Link as MuiLink, CircularProgress, useTheme } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useGoogleLogin } from '@react-oauth/google';
+import API_BASE_URL from '../config/api';
+import { sendSignInCredentialsEmail } from '../utils/emailjsClient';
 
 // ── Google Sign-Up Button ─────────────────────────────────────────────────────
 function GoogleSignUpButton({ navigate, setError }) {
   const [gLoading, setGLoading] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const login = useGoogleLogin({
     flow: 'implicit',
@@ -47,22 +51,22 @@ function GoogleSignUpButton({ navigate, setError }) {
     <Button
       fullWidth
       variant="outlined"
-      startIcon={gLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <GoogleIcon />}
+      startIcon={gLoading ? <CircularProgress size={18} sx={{ color: 'text.primary' }} /> : <GoogleIcon />}
       onClick={() => login()}
       disabled={gLoading}
       sx={{
         mb: 2,
         py: 1.3,
-        color: '#fff',
-        borderColor: 'rgba(255,255,255,0.15)',
-        background: 'rgba(255,255,255,0.03)',
+        color: 'text.primary',
+        borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)',
         fontWeight: 600,
         fontSize: '0.95rem',
         '&:hover': {
           borderColor: '#ec4899',
           background: 'rgba(236,72,153,0.08)',
         },
-        '&.Mui-disabled': { opacity: 0.6, color: '#fff' }
+        '&.Mui-disabled': { opacity: 0.6, color: 'text.primary' }
       }}
     >
       {gLoading ? 'Signing up...' : 'Continue with Google'}
@@ -73,6 +77,8 @@ function GoogleSignUpButton({ navigate, setError }) {
 import { IonPage, IonContent } from '@ionic/react';
 
 export default function SignUpPage() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,7 +93,7 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('https://invoice-generator-vfec.onrender.com/api/auth/signup', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
@@ -99,7 +105,12 @@ export default function SignUpPage() {
         // Save token to localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        // Show success popup
+        try {
+          await sendSignInCredentialsEmail({ name, email, password });
+        } catch (mailErr) {
+          console.error('EmailJS credentials email failed:', mailErr?.text || mailErr);
+          setError(mailErr?.text || 'Account created, but the welcome email did not send. Check spam or EmailJS.');
+        }
         setShowSuccess(true);
         // Delay redirect to allow user to read popup
         setTimeout(() => {
@@ -117,7 +128,7 @@ export default function SignUpPage() {
 
   return (
     <IonPage>
-      <IonContent>
+      <IonContent style={{ '--background': theme.palette.background.default }}>
         <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', p: 2 }}>
           {/* Background Glow */}
           <Box sx={{
@@ -143,18 +154,20 @@ export default function SignUpPage() {
 
           <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
             <Box sx={{ position: 'absolute', top: -60, left: 0 }}>
-              <Button component={Link} to="/" startIcon={<ArrowBackIcon />} sx={{ color: 'text.secondary', '&:hover': { color: '#fff' } }}>
+              <Button component={Link} to="/" startIcon={<ArrowBackIcon />} sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}>
                 Back to Home
               </Button>
             </Box>
 
             <Box sx={{ 
-              background: 'rgba(17, 24, 39, 0.7)',
+              background: isDark ? 'rgba(17, 24, 39, 0.7)' : '#ffffff',
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.08)',
               borderRadius: 4,
               p: { xs: 4, md: 5 },
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(236, 72, 153, 0.05)',
+              boxShadow: isDark 
+                ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(236, 72, 153, 0.05)' 
+                : '0 25px 50px -12px rgba(99, 102, 241, 0.04)',
               textAlign: 'center'
             }}>
               {/* Logo */}
@@ -173,7 +186,7 @@ export default function SignUpPage() {
                 </Box>
               </Box>
 
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#fff' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                 Create an account
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4 }}>
@@ -196,13 +209,14 @@ export default function SignUpPage() {
                 sx={{ 
                   mb: 3,
                   color: 'text.secondary', 
-                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  '&:hover': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }
                 }}
               >
                 GitHub (Coming Soon)
               </Button>
 
-              <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
+              <Divider sx={{ mb: 3, '&::before, &::after': { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } }}>
                 <Typography variant="caption" sx={{ color: 'text.secondary', px: 1 }}>OR CONTINUE WITH</Typography>
               </Divider>
 
@@ -218,11 +232,11 @@ export default function SignUpPage() {
                   InputProps={{
                     sx: { 
                       borderRadius: 2, 
-                      background: 'rgba(0,0,0,0.2)',
-                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
+                      '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)' },
+                      '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2) !important' : 'rgba(0,0,0,0.25) !important' },
                       '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                      color: '#fff'
+                      color: 'text.primary'
                     }
                   }}
                   InputLabelProps={{ sx: { color: 'text.secondary' } }}
@@ -238,11 +252,11 @@ export default function SignUpPage() {
                   InputProps={{
                     sx: { 
                       borderRadius: 2, 
-                      background: 'rgba(0,0,0,0.2)',
-                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
+                      '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)' },
+                      '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2) !important' : 'rgba(0,0,0,0.25) !important' },
                       '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                      color: '#fff'
+                      color: 'text.primary'
                     }
                   }}
                   InputLabelProps={{ sx: { color: 'text.secondary' } }}
@@ -258,11 +272,11 @@ export default function SignUpPage() {
                   InputProps={{
                     sx: { 
                       borderRadius: 2, 
-                      background: 'rgba(0,0,0,0.2)',
-                      '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      background: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)',
+                      '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)' },
+                      '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2) !important' : 'rgba(0,0,0,0.25) !important' },
                       '&.Mui-focused fieldset': { borderColor: '#ec4899 !important' },
-                      color: '#fff'
+                      color: 'text.primary'
                     }
                   }}
                   InputLabelProps={{ sx: { color: 'text.secondary' } }}
@@ -297,7 +311,7 @@ export default function SignUpPage() {
 
               <Typography variant="body2" sx={{ mt: 4, color: 'text.secondary' }}>
                 Already have an account?{' '}
-                <MuiLink component={Link} to="/login" sx={{ color: '#fff', fontWeight: 600, textDecoration: 'none', '&:hover': { color: '#f472b6' } }}>
+                <MuiLink component={Link} to="/login" sx={{ color: 'primary.main', fontWeight: 600, textDecoration: 'none', '&:hover': { color: 'primary.dark' } }}>
                   Log in
                 </MuiLink>
               </Typography>
@@ -307,7 +321,7 @@ export default function SignUpPage() {
           {/* Success Popup */}
           <Snackbar open={showSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
             <Alert severity="success" sx={{ width: '100%', background: '#10b981', color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
-              Account created successfully! Redirecting to login...
+              Account created. Credentials emailed — redirecting to login...
             </Alert>
           </Snackbar>
         </Box>

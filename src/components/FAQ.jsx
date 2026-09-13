@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Container, Typography, Accordion, AccordionSummary, AccordionDetails, useTheme } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const faqs = [
@@ -22,6 +22,8 @@ const faqs = [
 ];
 
 export default function FAQ() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [expanded, setExpanded] = useState('panel0');
 
   const handleChange = (panel) => (event, newExpanded) => {
@@ -32,10 +34,10 @@ export default function FAQ() {
     <Box id="faq" sx={{ py: { xs: 10, md: 15 }, position: 'relative' }}>
       <Container maxWidth="md">
         <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" sx={{ mb: 2 }}>
+          <Typography component="div" sx={{ mb: 2, color: 'text.primary', fontWeight: 800, letterSpacing: 0, fontSize: { xs: '2rem', md: '3.2rem' } }}>
             Frequently Asked Questions
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
+          <Typography color="text.secondary" sx={{ fontWeight: 500, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
             Everything you need to know about Invoice AI.
           </Typography>
         </Box>
@@ -47,27 +49,27 @@ export default function FAQ() {
               expanded={expanded === `panel${idx}`} 
               onChange={handleChange(`panel${idx}`)}
               sx={{
-                background: 'rgba(17, 24, 39, 0.6)',
-                border: '1px solid rgba(255,255,255,0.05)',
+                background: isDark ? 'rgba(17, 24, 39, 0.6)' : '#ffffff',
+                border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                 '&:before': { display: 'none' },
-                boxShadow: 'none',
+                boxShadow: isDark ? 'none' : '0 4px 20px rgba(0,0,0,0.02)',
                 borderRadius: '12px !important',
                 transition: 'all 0.3s ease',
                 '&.Mui-expanded': {
                   borderColor: 'rgba(99, 102, 241, 0.5)',
-                  background: 'rgba(17, 24, 39, 0.9)',
+                  background: isDark ? 'rgba(17, 24, 39, 0.9)' : '#ffffff',
                 }
               }}
             >
               <AccordionSummary
-                expandIcon={<ExpandMoreIcon sx={{ color: expanded === `panel${idx}` ? '#6366f1' : '#fff' }} />}
+                expandIcon={<ExpandMoreIcon sx={{ color: expanded === `panel${idx}` ? '#6366f1' : (isDark ? '#fff' : 'text.primary') }} />}
                 sx={{
                   px: 3, 
                   py: 1,
                   '& .MuiTypography-root': {
                     fontWeight: 600,
-                    fontSize: '1.1rem',
-                    color: expanded === `panel${idx}` ? '#6366f1' : '#fff',
+                    fontSize: { xs: '1.15rem', md: '1.3rem' },
+                    color: expanded === `panel${idx}` ? '#6366f1' : 'text.primary',
                     transition: 'color 0.2s ease'
                   }
                 }}
@@ -75,7 +77,7 @@ export default function FAQ() {
                 <Typography>{faq.q}</Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Typography sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
+                <Typography sx={{ color: 'text.secondary', lineHeight: 1.75, fontSize: { xs: '1.02rem', md: '1.15rem' } }}>
                   {faq.a}
                 </Typography>
               </AccordionDetails>

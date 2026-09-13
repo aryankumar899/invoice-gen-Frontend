@@ -17,6 +17,10 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { ThemeContext } from '../context/ThemeContext';
+import { useContext } from 'react';
 
 const navItems = ['Features', 'Dashboard', 'Testimonials', 'FAQ'];
 
@@ -25,6 +29,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { mode, toggleColorMode } = useContext(ThemeContext);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,11 +57,12 @@ export default function Header() {
         position="fixed" 
         elevation={scrolled ? 4 : 0}
         sx={{
-          background: scrolled ? 'rgba(17, 24, 39, 0.8)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+          background: mode === 'dark' ? 'rgba(3, 7, 18, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: `1px solid ${theme.palette.divider}`,
           transition: 'all 0.3s ease-in-out',
-          py: scrolled ? 1 : 2
+          py: scrolled ? 1 : 2,
+          zIndex: 1300
         }}
       >
         <Container maxWidth="xl">
@@ -77,7 +83,7 @@ export default function Header() {
               >
                 <ReceiptLongIcon sx={{ color: '#fff' }} />
               </Box>
-              <Typography variant="h6" component="div" sx={{ fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <Typography component="div" sx={{ fontWeight: 800, letterSpacing: 0, color: 'text.primary', fontSize: { xs: '1.2rem', md: '1.35rem' } }}>
                 Invoice AI
               </Typography>
             </Box>
@@ -91,7 +97,7 @@ export default function Header() {
                     onClick={() => scrollToEl(item)}
                     sx={{
                       cursor: 'pointer',
-                      fontSize: '0.95rem',
+                      fontSize: '1.05rem',
                       fontWeight: 600,
                       color: 'text.secondary',
                       position: 'relative',
@@ -123,19 +129,32 @@ export default function Header() {
 
             {/* Action Buttons */}
             {!isMobile ? (
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button component={Link} to="/login" variant="text" sx={{ color: 'text.primary', '&:hover': { background: 'rgba(255,255,255,0.05)' } }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <IconButton
+                  onClick={toggleColorMode}
+                  aria-label="Toggle theme"
+                  sx={{ color: 'text.primary' }}
+                >
+                  {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+                <Button component={Link} to="/login" variant="text" sx={{ color: 'text.primary', fontSize: '1rem', fontWeight: 700, '&:hover': { background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } }}>
                   Login
                 </Button>
-                <Button component={Link} to="/signup" variant="contained" color="primary">
+                <Button component={Link} to="/signup" variant="contained" color="primary" sx={{ fontSize: '1rem', fontWeight: 700, px: 2.5 }}>
                   Sign Up
                 </Button>
               </Box>
             ) : (
-              <IconButton color="inherit" aria-label="open drawer" edge="start" onClick={handleDrawerToggle}>
-                <MenuIcon />
-              </IconButton>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <IconButton onClick={toggleColorMode} aria-label="Toggle theme" sx={{ color: 'text.primary' }}>
+                  {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+                <IconButton sx={{ color: 'text.primary' }} aria-label="open drawer" edge="start" onClick={handleDrawerToggle}>
+                  <MenuIcon />
+                </IconButton>
+              </Box>
             )}
+
           </Toolbar>
         </Container>
       </AppBar>
@@ -147,7 +166,7 @@ export default function Header() {
         onClose={handleDrawerToggle}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250, background: 'rgba(17, 24, 39, 0.95)', backdropFilter: 'blur(10px)' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250, background: mode === 'dark' ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)' },
         }}
       >
         <Box sx={{ p: 2 }}>
@@ -164,6 +183,15 @@ export default function Header() {
             ))}
           </List>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, px: 2 }}>
+            <Button
+              variant="outlined"
+              fullWidth
+              color="inherit"
+              onClick={toggleColorMode}
+              startIcon={mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            >
+              {mode === 'dark' ? 'Light theme' : 'Dark theme'}
+            </Button>
             <Button component={Link} to="/login" variant="outlined" fullWidth color="inherit" onClick={handleDrawerToggle}>Login</Button>
             <Button component={Link} to="/signup" variant="contained" fullWidth color="primary" onClick={handleDrawerToggle}>Sign Up</Button>
           </Box>

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Box, Container, Typography, Button, IconButton } from '@mui/material';
+import { Box, Container, Typography, Button, IconButton, useTheme } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 
 export default function FooterCTA() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box sx={{ position: 'relative', mt: { xs: 5, md: 10 } }}>
       {/* CTA Section */}
@@ -14,8 +17,11 @@ export default function FooterCTA() {
             p: { xs: 4, md: 8 }, 
             textAlign: 'center', 
             borderRadius: 6,
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0.1) 100%)',
-            border: '1px solid rgba(255,255,255,0.05)',
+            background: isDark 
+              ? 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0.1) 100%)' 
+              : 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(236,72,153,0.05) 100%)',
+            border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.06)',
+            boxShadow: isDark ? 'none' : '0 10px 30px rgba(99, 102, 241, 0.03)',
             position: 'relative',
             overflow: 'hidden'
           }}
@@ -33,10 +39,10 @@ export default function FooterCTA() {
           }} />
 
           <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 600, mx: 'auto' }}>
-            <Typography variant="h2" sx={{ mb: 2, color: '#fff', fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3.75rem' } }}>
+            <Typography component="div" sx={{ mb: 2, color: 'text.primary', fontWeight: 800, letterSpacing: 0, fontSize: { xs: '2.1rem', sm: '2.8rem', md: '3.9rem' } }}>
               Start Creating Smart Invoices Today 🚀
             </Typography>
-            <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400, mb: 4, fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 500, mb: 4, fontSize: { xs: '1.1rem', sm: '1.35rem' }, lineHeight: 1.7 }}>
               Join thousands of modern businesses using our AI platform to scale their revenue ops.
             </Typography>
             <Button 
@@ -63,14 +69,14 @@ export default function FooterCTA() {
       </Container>
 
       {/* Simple Footer */}
-      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', mt: 10, py: 4, background: '#030712' }}>
+      <Box sx={{ borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.06)', mt: 10, py: 4, background: isDark ? '#030712' : '#ffffff' }}>
         <Container maxWidth="xl" sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
           <Typography variant="body2" color="text.secondary">
             © {new Date().getFullYear()} Invoice AI. All rights reserved.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton sx={{ color: 'text.secondary', '&:hover': { color: '#6366f1' } }}><TwitterIcon /></IconButton>
-            <IconButton sx={{ color: 'text.secondary', '&:hover': { color: '#fff' } }}><GitHubIcon /></IconButton>
+            <IconButton sx={{ color: 'text.secondary', '&:hover': { color: isDark ? '#fff' : '#000' } }}><GitHubIcon /></IconButton>
             <IconButton sx={{ color: 'text.secondary', '&:hover': { color: '#0ea5e9' } }}><LinkedInIcon /></IconButton>
           </Box>
         </Container>

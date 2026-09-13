@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, Grid, Card } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, useTheme } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsightsIcon from '@mui/icons-material/Insights';
 import PeopleIcon from '@mui/icons-material/People';
@@ -47,17 +47,19 @@ const features = [
 ];
 
 export default function Features() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   return (
     <Box id="features" sx={{ py: { xs: 10, md: 15 }, position: 'relative' }}>
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 8 }, maxWidth: 700, mx: 'auto' }}>
-          <Typography variant="caption" sx={{ color: '#ec4899', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <Typography sx={{ color: '#ec4899', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: { xs: '0.85rem', md: '1rem' } }}>
             Powerful Features
           </Typography>
-          <Typography variant="h2" sx={{ my: 2, fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3.75rem' } }}>
+          <Typography component="div" sx={{ my: 2, color: 'text.primary', fontWeight: 800, letterSpacing: 0, fontSize: { xs: '2.1rem', sm: '2.8rem', md: '3.9rem' } }}>
             Everything you need, nothing you don't.
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>
+          <Typography color="text.secondary" sx={{ fontWeight: 500, fontSize: { xs: '1.05rem', md: '1.25rem' }, lineHeight: 1.7 }}>
             Our platform is carefully crafted to ensure you spend less time managing invoices and more time growing your business.
           </Typography>
         </Box>
@@ -81,15 +83,16 @@ export default function Features() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: { xs: 1.5, md: 2 },
-                  background: 'rgba(17, 24, 39, 0.4)',
-                  borderColor: 'rgba(255,255,255,0.02)',
+                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
+                  borderColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.06)',
+                  boxShadow: isDark ? 'none' : '0 4px 20px rgba(0,0,0,0.02)',
                   transition: 'all 0.3s ease',
                   position: 'relative',
                   overflow: 'hidden',
                   '&:hover': {
                     transform: 'translateY(-8px)',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    boxShadow: `0 10px 40px -10px ${feature.color}40`,
+                    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(99, 102, 241, 0.2)',
+                    boxShadow: isDark ? `0 10px 40px -10px ${feature.color}40` : `0 10px 40px -10px ${feature.color}20`,
                     '& .icon-wrapper': {
                       background: feature.color,
                       color: '#fff',
@@ -125,10 +128,10 @@ export default function Features() {
                   >
                     <Icon sx={{ fontSize: { xs: 20, md: 24 } }} />
                   </Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', mt: 1, fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
+                  <Typography sx={{ fontWeight: 800, color: 'text.primary', mt: 1, fontSize: { xs: '1.25rem', md: '1.55rem' }, letterSpacing: 0 }}>
                     {feature.title}
                   </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.6, fontSize: { xs: '0.85rem', md: '1rem' } }}>
+                  <Typography sx={{ color: 'text.secondary', lineHeight: 1.7, fontSize: { xs: '1rem', md: '1.12rem' } }}>
                     {feature.description}
                   </Typography>
                 </Card>

@@ -6,13 +6,16 @@ import Features from '../components/Features';
 import Testimonials from '../components/Testimonials';
 import FAQ from '../components/FAQ';
 import FooterCTA from '../components/FooterCTA';
+import { useTheme } from '@mui/material/styles';
 
 import { IonPage, IonContent } from '@ionic/react';
 
 export default function HomePage() {
+  const theme = useTheme();
+
   return (
     <IonPage>
-      <IonContent>
+      <IonContent style={{ '--background': theme.palette.background.default }}>
         <Header />
         <Hero />
         <DashboardPreview />
