@@ -1,6 +1,7 @@
 import emailjs from '@emailjs/browser';
 import { buildEmailParams } from './emailTemplates';
 import fileKeys from '../config/emailjs.keys.json';
+import { publicAppUrl, withPublicAppUrls } from '../config/appUrl';
 
 function credentials() {
   const welcomeTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_CREDENTIALS || fileKeys.welcomeTemplateId || import.meta.env.VITE_EMAILJS_TEMPLATE_ID || fileKeys.templateId || '';
@@ -38,7 +39,7 @@ export async function sendSignInCredentialsEmail({ name, email, password }) {
       email,
       password,
       type: 'credentials',
-      appUrl: window.location.origin,
+      appUrl: publicAppUrl(),
     }),
     { publicKey }
   );
@@ -48,13 +49,13 @@ export async function sendSignInCredentialsEmail({ name, email, password }) {
 export async function sendResetLinkEmail(params) {
   if (!emailJsReady()) return false;
   const { serviceId, resetTemplateId, publicKey } = credentials();
-  await emailjs.send(serviceId, resetTemplateId, params, { publicKey });
+  await emailjs.send(serviceId, resetTemplateId, withPublicAppUrls(params), { publicKey });
   return true;
 }
 
 export async function sendPasswordChangedEmail(params) {
   if (!emailJsReady()) return false;
   const { serviceId, welcomeTemplateId, publicKey } = credentials();
-  await emailjs.send(serviceId, welcomeTemplateId, params, { publicKey });
+  await emailjs.send(serviceId, welcomeTemplateId, withPublicAppUrls(params), { publicKey });
   return true;
 }
